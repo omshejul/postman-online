@@ -36,14 +36,14 @@ export class ErrorBoundary extends React.Component<Props, State> {
           <motion.div
             initial={{ opacity: 0, scale: 0.95 }}
             animate={{ opacity: 1, scale: 1 }}
-            transition={{ duration: 0.3 }}
+            transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
           >
             <Card className="w-full max-w-md">
               <CardHeader className="text-center">
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  transition={{ delay: 0.1, type: "spring" }}
+                  transition={{ delay: 0.1, duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
                   className="mx-auto w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-4"
                 >
                   <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />

@@ -1,10 +1,19 @@
 "use client";
 
-import React, { useState, useCallback, useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
-import { Zap, ChevronDown, ChevronRight } from "lucide-react";
+import React, { useCallback, useMemo } from "react";
+import { Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ExampleApi {
   name: string;
@@ -120,83 +129,9 @@ const getMethodColor = (method: string) => {
   }
 };
 
-const CategorySection = React.memo(function CategorySection({
-  category,
-  apis,
-  isExpanded,
-  onToggle,
-  onSelectApi,
-}: {
-  category: string;
-  apis: ExampleApi[];
-  isExpanded: boolean;
-  onToggle: () => void;
-  onSelectApi: (api: ExampleApi) => void;
-}) {
-  return (
-    <div>
-      <Button
-        variant="ghost"
-        onClick={onToggle}
-        className="w-full flex items-center justify-between p-3 hover:bg-gray-50 dark:hover:bg-gray-700/50 border-b border-gray-100 dark:border-gray-700"
-      >
-        <span className="font-medium text-gray-900 dark:text-white">
-          {category}
-        </span>
-        {isExpanded ? (
-          <ChevronDown className="w-4 h-4 text-gray-500" />
-        ) : (
-          <ChevronRight className="w-4 h-4 text-gray-500" />
-        )}
-      </Button>
-
-      <AnimatePresence>
-        {isExpanded && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: "auto", opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            transition={{ duration: 0.2 }}
-            className="overflow-hidden bg-gray-50 dark:bg-gray-700/30"
-          >
-            {apis.map((api, index) => (
-              <motion.button
-                key={index}
-                initial={{ opacity: 0, x: -10 }}
-                animate={{ opacity: 1, x: 0 }}
-                transition={{ delay: index * 0.05 }}
-                onClick={() => onSelectApi(api)}
-                className="w-full text-left p-3 hover:bg-gray-100 dark:hover:bg-gray-600/50 border-b border-gray-200 dark:border-gray-600 last:border-b-0 group"
-              >
-                <div className="flex items-center gap-2 mb-1">
-                  <span className={`px-2 py-1 text-xs font-mono rounded ${getMethodColor(api.method)}`}>
-                    {api.method}
-                  </span>
-                  <span className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-                    {api.name}
-                  </span>
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400 truncate font-mono">
-                  {api.url}
-                </div>
-                <div className="text-xs text-gray-500 dark:text-gray-500 mt-1">
-                  {api.description}
-                </div>
-              </motion.button>
-            ))}
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  );
-});
-
 export default function ExampleApis({ onSelectApi }: ExampleApisProps) {
-  const [isOpen, setIsOpen] = useState(false);
-  const [expandedCategories, setExpandedCategories] = useState<string[]>([]);
-
-  const categories = useMemo(() => 
-    [...new Set(exampleApis.map((api) => api.category))], 
+  const categories = useMemo(
+    () => [...new Set(exampleApis.map((api) => api.category))],
     []
   );
 
@@ -211,14 +146,6 @@ export default function ExampleApis({ onSelectApi }: ExampleApisProps) {
     return grouped;
   }, []);
 
-  const toggleCategory = useCallback((category: string) => {
-    setExpandedCategories((prev) =>
-      prev.includes(category)
-        ? prev.filter((c) => c !== category)
-        : [...prev, category]
-    );
-  }, []);
-
   const handleSelectApi = useCallback(
     (api: ExampleApi) => {
       onSelectApi({
@@ -226,71 +153,69 @@ export default function ExampleApis({ onSelectApi }: ExampleApisProps) {
         method: api.method,
         url: api.url,
       });
-      setIsOpen(false);
     },
     [onSelectApi]
   );
 
   return (
-    <div className="relative">
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => setIsOpen(!isOpen)}
-        className="text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
-      >
-        <Zap className="w-4 h-4 mr-2" />
-        Examples
-      </Button>
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground hover:text-foreground"
+        >
+          <Zap className="w-4 h-4 mr-2" />
+          Examples
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-80" align="start">
+        <DropdownMenuLabel>
+          <div>
+            <div className="font-medium">Example APIs</div>
+            <div className="text-sm text-muted-foreground font-normal">
+              Click to load example requests
+            </div>
+          </div>
+        </DropdownMenuLabel>
+        <DropdownMenuSeparator />
 
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0, scale: 0.95, y: -10 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -10 }}
-            transition={{ duration: 0.2 }}
-            className="absolute top-full left-0 mt-2 w-96 z-20"
-          >
-            <Card className="shadow-lg">
-              <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-                <h3 className="font-medium text-gray-900 dark:text-white">
-                  Example APIs
-                </h3>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  Click to load example requests
-                </p>
-              </div>
-
-              <div className="max-h-96 overflow-y-auto">
-                {categories.map((category) => (
-                  <CategorySection
-                    key={category}
-                    category={category}
-                    apis={categorizedApis[category]}
-                    isExpanded={expandedCategories.includes(category)}
-                    onToggle={() => toggleCategory(category)}
-                    onSelectApi={handleSelectApi}
-                  />
-                ))}
-              </div>
-            </Card>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Backdrop */}
-      <AnimatePresence>
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-10"
-            onClick={() => setIsOpen(false)}
-          />
-        )}
-      </AnimatePresence>
-    </div>
+        {categories.map((category) => (
+          <DropdownMenuSub key={category}>
+            <DropdownMenuSubTrigger className="flex items-center">
+              <span className="font-medium">{category}</span>
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="w-72">
+              {categorizedApis[category].map((api, index) => (
+                <DropdownMenuItem
+                  key={index}
+                  onClick={() => handleSelectApi(api)}
+                  className="flex flex-col items-start p-3 cursor-pointer"
+                >
+                  <div className="flex items-center gap-2 mb-1 w-full">
+                    <span
+                      className={`px-2 py-1 text-xs font-mono rounded ${getMethodColor(
+                        api.method
+                      )}`}
+                    >
+                      {api.method}
+                    </span>
+                    <span className="font-medium text-foreground">
+                      {api.name}
+                    </span>
+                  </div>
+                  <div className="text-sm text-muted-foreground truncate font-mono w-full">
+                    {api.url}
+                  </div>
+                  <div className="text-xs text-muted-foreground mt-1">
+                    {api.description}
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+        ))}
+      </DropdownMenuContent>
+    </DropdownMenu>
   );
 }

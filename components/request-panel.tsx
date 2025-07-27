@@ -64,10 +64,10 @@ export const RequestPanel = React.memo(function RequestPanel({
   setHtmlContent,
   onConvertHtmlToJson,
 }: RequestPanelProps) {
-  const [activeTab, setActiveTab] = useState<'json' | 'html'>('json');
+  const [activeTab, setActiveTab] = useState<"json" | "html">("json");
 
-  const hasBodySection = useMemo(() => 
-    METHODS_WITH_BODY.includes(method), 
+  const hasBodySection = useMemo(
+    () => METHODS_WITH_BODY.includes(method),
     [method]
   );
 
@@ -91,18 +91,21 @@ export const RequestPanel = React.memo(function RequestPanel({
     [headers, setHeaders]
   );
 
-  const handleKeyDown = useCallback((e: React.KeyboardEvent) => {
-    if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-      e.preventDefault();
-      onSendRequest();
-    }
-  }, [onSendRequest]);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+        e.preventDefault();
+        onSendRequest();
+      }
+    },
+    [onSendRequest]
+  );
 
   const formatJson = useCallback(() => {
     try {
       const formatted = JSON.stringify(JSON.parse(body), null, 2);
       setBody(formatted);
-    } catch (error) {
+    } catch {
       // JSON is invalid, can't format
     }
   }, [body, setBody]);
@@ -160,31 +163,26 @@ export const RequestPanel = React.memo(function RequestPanel({
   }, [setHtmlContent]);
 
   return (
-    <Card className="w-full bg-white dark:bg-gray-800">
-      <CardHeader className="flex flex-row items-center justify-between p-4 border-b">
+    <Card className="w-full">
+      <CardHeader className="flex flex-row items-center justify-between p-4 border-b border-border">
         <CardTitle className="text-lg font-semibold">Request</CardTitle>
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={onSaveRequest}
-          className="text-gray-600 dark:text-gray-400"
-        >
+        <Button variant="ghost" size="sm" onClick={onSaveRequest}>
           Save
         </Button>
       </CardHeader>
-      
+
       <CardContent className="p-6 space-y-6">
         {/* Method and URL */}
-        <motion.div 
+        <motion.div
           className="flex gap-2"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: 0.1, duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
         >
           <select
             value={method}
             onChange={(e) => setMethod(e.target.value)}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-transparent min-w-[100px]"
+            className="px-3 py-2 border border-input rounded-md bg-background text-foreground focus:ring-2 focus:ring-ring focus:border-transparent min-w-[100px]"
           >
             {HTTP_METHODS.map((m) => (
               <option key={m} value={m}>
@@ -201,13 +199,12 @@ export const RequestPanel = React.memo(function RequestPanel({
             className="flex-1"
           />
           <Button
-            variant="blue"
             onClick={onSendRequest}
-            loading={loading}
+            disabled={loading}
             className="min-w-[80px]"
           >
             <Send className="w-4 h-4 mr-2" />
-            Send
+            {loading ? "Sending..." : "Send"}
           </Button>
         </motion.div>
 
@@ -215,23 +212,16 @@ export const RequestPanel = React.memo(function RequestPanel({
         <motion.div
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
-          transition={{ delay: 0.2 }}
+          transition={{ delay: 0.2, duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
         >
           <div className="flex items-center justify-between mb-3">
-            <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-              Headers
-            </h3>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={addHeader}
-              className="text-blue-600 hover:text-blue-700"
-            >
+            <h3 className="text-sm font-medium">Headers</h3>
+            <Button variant="ghost" size="sm" onClick={addHeader}>
               <Plus className="w-4 h-4 mr-1" />
               Add Header
             </Button>
           </div>
-          
+
           <AnimatePresence>
             <div className="space-y-2">
               {headers.map((header, index) => (
@@ -250,7 +240,9 @@ export const RequestPanel = React.memo(function RequestPanel({
                   />
                   <Input
                     value={header.value}
-                    onChange={(e) => updateHeader(index, "value", e.target.value)}
+                    onChange={(e) =>
+                      updateHeader(index, "value", e.target.value)
+                    }
                     placeholder="Header value"
                     className="flex-1"
                   />
@@ -258,7 +250,7 @@ export const RequestPanel = React.memo(function RequestPanel({
                     variant="ghost"
                     size="icon"
                     onClick={() => removeHeader(index)}
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                    className="text-destructive hover:text-destructive"
                   >
                     <X className="w-4 h-4" />
                   </Button>
@@ -273,18 +265,16 @@ export const RequestPanel = React.memo(function RequestPanel({
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.3, duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
           >
             <div className="flex items-center justify-between mb-3">
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300">
-                Body
-              </h3>
+              <h3 className="text-sm font-medium">Body</h3>
               <div className="flex gap-2">
                 <Button
-                  variant={activeTab === 'json' ? 'default' : 'ghost'}
+                  variant={activeTab === "json" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => {
-                    setActiveTab('json');
+                    setActiveTab("json");
                     setShowHtmlEditor(false);
                   }}
                 >
@@ -292,10 +282,10 @@ export const RequestPanel = React.memo(function RequestPanel({
                   JSON
                 </Button>
                 <Button
-                  variant={activeTab === 'html' ? 'default' : 'ghost'}
+                  variant={activeTab === "html" ? "default" : "ghost"}
                   size="sm"
                   onClick={() => {
-                    setActiveTab('html');
+                    setActiveTab("html");
                     setShowHtmlEditor(true);
                   }}
                 >
@@ -319,22 +309,23 @@ export const RequestPanel = React.memo(function RequestPanel({
                     placeholder="Enter request body (JSON) - Use ``` to wrap HTML content"
                     rows={8}
                     className={cn(
-                      "w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none",
+                      "w-full px-3 py-2 border border-input rounded-md bg-background text-foreground font-mono text-sm focus:ring-2 focus:ring-ring focus:border-transparent resize-none",
                       jsonError
-                        ? "border-red-500 focus:border-red-500"
-                        : "border-gray-300 dark:border-gray-600"
+                        ? "border-destructive focus:border-destructive"
+                        : "border-input"
                     )}
                   />
                   {jsonError && (
                     <motion.div
                       initial={{ opacity: 0, height: 0 }}
                       animate={{ opacity: 1, height: "auto" }}
-                      className="mt-2 text-sm text-red-600 dark:text-red-400"
+                      transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                      className="mt-2 text-sm text-destructive"
                     >
                       <strong>JSON Error:</strong> {jsonError}
                     </motion.div>
                   )}
-                  
+
                   <div className="mt-3 flex gap-2">
                     <Button variant="ghost" size="sm" onClick={formatJson}>
                       Format JSON
@@ -351,10 +342,11 @@ export const RequestPanel = React.memo(function RequestPanel({
                   animate={{ opacity: 1 }}
                   exit={{ opacity: 0 }}
                 >
-                  <div className="mb-3 p-3 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md">
-                    <p className="text-sm text-blue-800 dark:text-blue-200">
-                      💡 <strong>HTML Editor Mode:</strong> Write clean HTML here. 
-                      It will be automatically converted to properly escaped JSON.
+                  <div className="mb-3 p-3 bg-muted border border-border rounded-md">
+                    <p className="text-sm text-muted-foreground">
+                      💡 <strong>HTML Editor Mode:</strong> Write clean HTML
+                      here. It will be automatically converted to properly
+                      escaped JSON.
                     </p>
                   </div>
                   <textarea
@@ -362,13 +354,21 @@ export const RequestPanel = React.memo(function RequestPanel({
                     onChange={(e) => setHtmlContent(e.target.value)}
                     placeholder="Write your HTML content here (no need to escape quotes)..."
                     rows={10}
-                    className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                    className="w-full px-3 py-2 border border-input rounded-md bg-background text-foreground font-mono text-sm focus:ring-2 focus:ring-ring focus:border-transparent resize-none"
                   />
                   <div className="mt-3 flex gap-2">
-                    <Button variant="green" size="sm" onClick={onConvertHtmlToJson}>
+                    <Button
+                      variant="default"
+                      size="sm"
+                      onClick={onConvertHtmlToJson}
+                    >
                       Convert to JSON
                     </Button>
-                    <Button variant="ghost" size="sm" onClick={loadHtmlTemplate}>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={loadHtmlTemplate}
+                    >
                       Load Template
                     </Button>
                   </div>
