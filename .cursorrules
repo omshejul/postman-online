@@ -1,0 +1,190 @@
+# Cursor Rules for Next.js Project
+
+## Project Overview
+
+This is a Next.js 15 project with TypeScript, Tailwind CSS v4, and React 19. The project follows modern Next.js App Router patterns.
+
+## File Structure
+
+- `app/` - Next.js App Router directory containing pages and layouts
+- `public/` - Static assets
+- `components/` - Reusable React components (create if needed)
+- `lib/` - Utility functions and shared logic (create if needed)
+- `types/` - TypeScript type definitions (create if needed)
+
+## Coding Standards
+
+### TypeScript
+
+- Use strict TypeScript configuration
+- Prefer explicit typing over implicit
+- Use interface for object shapes, type for unions/primitives
+- Always type function parameters and return values
+- Use generic types when appropriate
+
+### React & Next.js
+- Always use Schadcn if possible, search for latest components
+- Use React 19 features and patterns
+- Prefer Server Components by default, use Client Components only when needed
+- Use Next.js App Router patterns
+- Implement proper error boundaries
+- Use Next.js Image component for images
+- Follow Next.js file-based routing conventions
+
+### Styling
+
+- Use Tailwind CSS v4 for styling
+- Prefer utility classes over custom CSS
+- Use CSS variables for theming
+- Implement responsive design with Tailwind breakpoints
+- Use semantic class names and organize utilities logically
+
+### Component Patterns
+
+- Use functional components with hooks
+- Implement proper prop validation with TypeScript
+- Use React.memo for performance optimization when needed
+- Follow single responsibility principle
+- Use composition over inheritance
+
+### State Management
+
+- Use React hooks (useState, useEffect, useContext) for local state
+- Consider React Query/SWR for server state
+- Use Zustand or Context API for global state if needed
+- Implement proper loading and error states
+
+### Performance
+
+- Use Next.js built-in optimizations
+- Implement proper code splitting
+- Use dynamic imports for heavy components
+- Optimize images and assets
+- Implement proper caching strategies
+
+### Code Quality
+
+- Follow ESLint rules (next/core-web-vitals, next/typescript)
+- Use Prettier for code formatting
+- Write meaningful component and function names
+- Add JSDoc comments for complex functions
+- Keep components small and focused
+
+### File Naming
+
+- Use kebab-case for file names
+- Use PascalCase for component names
+- Use camelCase for functions and variables
+- Use UPPER_SNAKE_CASE for constants
+
+### Imports
+
+- Use absolute imports with `@/` prefix
+- Group imports: React, Next.js, third-party, local
+- Use named imports over default imports when possible
+- Remove unused imports
+
+### Error Handling
+
+- Implement proper error boundaries
+- Use try-catch for async operations
+- Provide meaningful error messages
+- Handle loading and error states gracefully
+
+### Accessibility
+
+- Use semantic HTML elements
+- Implement proper ARIA attributes
+- Ensure keyboard navigation
+- Test with screen readers
+- Use proper color contrast
+
+### Testing
+
+- Write unit tests for utility functions
+- Write integration tests for components
+- Test error scenarios
+- Use React Testing Library patterns
+
+## Common Patterns
+
+### Page Components
+
+```typescript
+export default function PageName() {
+  return <main className="container mx-auto px-4 py-8">{/* Content */}</main>;
+}
+```
+
+### Layout Components
+
+```typescript
+export default function LayoutName({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
+  return <div className="layout-container">{children}</div>;
+}
+```
+
+### Client Components
+
+```typescript
+"use client";
+
+import { useState, useEffect } from "react";
+
+export default function ClientComponent() {
+  const [state, setState] = useState();
+
+  useEffect(() => {
+    // Side effects
+  }, []);
+
+  return <div>Content</div>;
+}
+```
+
+### API Routes
+
+```typescript
+import { NextRequest, NextResponse } from "next/server";
+
+export async function GET(request: NextRequest) {
+  try {
+    // Handle GET request
+    return NextResponse.json({ data: "response" });
+  } catch (error) {
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+```
+
+## Dependencies
+
+- Next.js 15.4.4
+- React 19.1.0
+- TypeScript 5+
+- Tailwind CSS 4
+- ESLint with Next.js config
+
+## Development Workflow
+
+- Use `npm run dev` for development
+- Use `npm run build` for production build
+- Use `npm run lint` for linting
+- Use `npm run start` for production server
+
+## Best Practices
+
+- Keep components pure and predictable
+- Use TypeScript for better developer experience
+- Implement proper SEO with Next.js metadata
+- Use environment variables for configuration
+- Follow security best practices
+- Implement proper logging and monitoring
+- Use Git hooks for code quality checks
