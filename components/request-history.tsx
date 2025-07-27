@@ -83,7 +83,7 @@ export default function RequestHistory({ onLoadRequest }: RequestHistoryProps) {
             </h3>
           </div>
 
-          <div className="max-h-64 overflow-y-auto">
+          <div className="max-h-64 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
             {savedRequests.length === 0 ? (
               <div className="p-4 text-center text-gray-500 dark:text-gray-400 text-sm">
                 No saved requests

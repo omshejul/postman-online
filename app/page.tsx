@@ -280,7 +280,7 @@ export default function ApiTester() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 overflow-x-hidden">
       <div className="container mx-auto p-6">
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
@@ -446,7 +446,7 @@ export default function ApiTester() {
                         }}
                         placeholder="Enter request body (JSON) - Use ``` to wrap HTML content"
                         rows={6}
-                        className={`w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent ${
+                        className={`w-full px-3 py-2 border rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent ${
                           jsonError
                             ? "border-red-500 focus:border-red-500"
                             : "border-gray-300 dark:border-gray-600"
@@ -533,7 +533,7 @@ export default function ApiTester() {
                         onChange={(e) => setHtmlContent(e.target.value)}
                         placeholder="Write your HTML content here (no need to escape quotes)..."
                         rows={8}
-                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                        className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-gray-900 dark:text-white font-mono text-sm focus:ring-2 focus:ring-blue-500 focus:border-transparent scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent"
                       />
                       <div className="mt-2 flex gap-2">
                         <button
@@ -634,7 +634,7 @@ export default function ApiTester() {
                     <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Response Headers
                     </h3>
-                    <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-3 max-h-32 overflow-y-auto">
+                    <div className="bg-gray-50 dark:bg-gray-700 rounded-md p-3 max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
                       {Object.entries(response.headers).map(([key, value]) => (
                         <div key={key} className="text-sm font-mono">
                           <span className="text-gray-600 dark:text-gray-400">
@@ -653,7 +653,7 @@ export default function ApiTester() {
                     <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Response Body
                     </h3>
-                    <pre className="bg-gray-50 dark:bg-gray-700 rounded-md p-3 text-sm font-mono text-gray-900 dark:text-white overflow-x-auto max-h-96 overflow-y-auto">
+                    <pre className="bg-gray-50 dark:bg-gray-700 rounded-md p-3 text-sm font-mono text-gray-900 dark:text-white overflow-x-auto max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
                       {typeof response.data === "object"
                         ? JSON.stringify(response.data, null, 2)
                         : response.data}
