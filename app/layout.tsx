@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { ErrorBoundary } from "@/components/error-boundary";
+import { ThemeProvider } from "@/components/theme-provider";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -15,7 +16,8 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "API Tester - Modern Postman Alternative",
-  description: "Test your APIs with a clean, modern interface. Built with Next.js, React, and Tailwind CSS.",
+  description:
+    "Test your APIs with a clean, modern interface. Built with Next.js, React, and Tailwind CSS.",
   keywords: ["API", "testing", "Postman", "REST", "HTTP", "developer tools"],
   authors: [{ name: "Om Shejul", email: "om@arthkin.com" }],
   creator: "Om Shejul",
@@ -36,9 +38,14 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
-        <ErrorBoundary>
-          {children}
-        </ErrorBoundary>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ErrorBoundary>{children}</ErrorBoundary>
+        </ThemeProvider>
       </body>
     </html>
   );

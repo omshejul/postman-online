@@ -1,18 +1,19 @@
 "use client";
 
-import React, { useState, useCallback, useMemo } from "react";
+import React, { useState, useCallback } from "react";
 import { motion } from "framer-motion";
 import { RequestPanel } from "@/components/request-panel";
 import { ResponsePanel } from "@/components/response-panel";
 import RequestHistory from "@/components/request-history";
 import ExampleApis from "@/components/example-apis";
+import { ThemeToggle } from "@/components/theme-toggle";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 
 interface ApiResponse {
   status: number;
   statusText: string;
   headers: Record<string, string>;
-  data: any;
+  data: unknown;
   time: number;
 }
 
@@ -23,7 +24,9 @@ interface Header {
 
 export default function ApiTester() {
   const [method, setMethod] = useState("GET");
-  const [url, setUrl] = useState("https://jsonplaceholder.typicode.com/posts/1");
+  const [url, setUrl] = useState(
+    "https://jsonplaceholder.typicode.com/posts/1"
+  );
   const [headers, setHeaders] = useState<Header[]>([
     { key: "Content-Type", value: "application/json" },
   ]);
@@ -37,24 +40,6 @@ export default function ApiTester() {
 
   const { saveRequest } = useLocalStorage();
 
-  const validateJson = useCallback((jsonString: string): boolean => {
-    if (!jsonString.trim()) return true;
-
-    let processedString = jsonString;
-    if (jsonString.includes("```")) {
-      processedString = processTripleBackticks(jsonString);
-    }
-
-    try {
-      JSON.parse(processedString);
-      setJsonError(null);
-      return true;
-    } catch (error) {
-      setJsonError(error instanceof Error ? error.message : "Invalid JSON");
-      return false;
-    }
-  }, []);
-
   const processTripleBackticks = useCallback((jsonString: string): string => {
     return jsonString.replace(/```([\s\S]*?)```/g, (match, content) => {
       const escaped = content
@@ -67,6 +52,27 @@ export default function ApiTester() {
     });
   }, []);
 
+  const validateJson = useCallback(
+    (jsonString: string): boolean => {
+      if (!jsonString.trim()) return true;
+
+      let processedString = jsonString;
+      if (jsonString.includes("```")) {
+        processedString = processTripleBackticks(jsonString);
+      }
+
+      try {
+        JSON.parse(processedString);
+        setJsonError(null);
+        return true;
+      } catch (error) {
+        setJsonError(error instanceof Error ? error.message : "Invalid JSON");
+        return false;
+      }
+    },
+    [processTripleBackticks]
+  );
+
   const convertHtmlToJson = useCallback(() => {
     try {
       const currentJson = body ? JSON.parse(body) : {};
@@ -78,7 +84,7 @@ export default function ApiTester() {
       setBody(JSON.stringify(updatedJson, null, 2));
       setJsonError(null);
       setShowHtmlEditor(false);
-    } catch (error) {
+    } catch {
       setJsonError("Failed to convert HTML to JSON");
     }
   }, [body, htmlContent]);
@@ -90,7 +96,7 @@ export default function ApiTester() {
       headers,
       body,
     });
-    
+
     if (savedRequest) {
       // Show success feedback if needed
       console.log("Request saved successfully");
@@ -161,110 +167,125 @@ export default function ApiTester() {
     }
   }, [method, url, headers, body, processTripleBackticks, validateJson]);
 
-  const loadRequest = useCallback((request: {
-    method: string;
-    url: string;
-    headers: Array<{ key: string; value: string }>;
-    body: string;
-  }) => {
-    setMethod(request.method);
-    setUrl(request.url);
-    setHeaders(request.headers);
-    setBody(request.body);
-  }, []);
+  const loadRequest = useCallback(
+    (request: {
+      method: string;
+      url: string;
+      headers: Array<{ key: string; value: string }>;
+      body: string;
+    }) => {
+      setMethod(request.method);
+      setUrl(request.url);
+      setHeaders(request.headers);
+      setBody(request.body);
+    },
+    []
+  );
 
-  const selectExampleApi = useCallback((api: { method: string; url: string }) => {
-    setMethod(api.method);
-    setUrl(api.url);
+  const selectExampleApi = useCallback(
+    (api: { method: string; url: string }) => {
+      setMethod(api.method);
+      setUrl(api.url);
 
-    if (["POST", "PUT", "PATCH"].includes(api.method)) {
-      if (api.url.includes("jsonplaceholder")) {
-        setBody(
-          JSON.stringify(
-            {
-              title: "Sample Post",
-              body: "This is a sample post body",
-              userId: 1,
-            },
-            null,
-            2
-          )
-        );
-      } else if (api.url.includes("httpbin")) {
-        setBody(
-          JSON.stringify(
-            {
-              message: "Hello from API Tester",
-              timestamp: new Date().toISOString(),
-            },
-            null,
-            2
-          )
-        );
-      } else if (api.url.includes("email") || api.url.includes("mail")) {
-        setBody(
-          JSON.stringify(
-            {
-              from: "Om Shejul <om@arthkin.com>",
-              to: "Om Shejul <contact@omshejul.com>",
-              subject: "Test Email",
-              "body-type": "html",
-              body: "<!DOCTYPE html><html><head><title>Test Email</title></head><body><h1>Hello World!</h1><p>This is a test email with <strong>HTML content</strong>.</p></body></html>",
-            },
-            null,
-            2
-          )
-        );
+      if (["POST", "PUT", "PATCH"].includes(api.method)) {
+        if (api.url.includes("jsonplaceholder")) {
+          setBody(
+            JSON.stringify(
+              {
+                title: "Sample Post",
+                body: "This is a sample post body",
+                userId: 1,
+              },
+              null,
+              2
+            )
+          );
+        } else if (api.url.includes("httpbin")) {
+          setBody(
+            JSON.stringify(
+              {
+                message: "Hello from API Tester",
+                timestamp: new Date().toISOString(),
+              },
+              null,
+              2
+            )
+          );
+        } else if (api.url.includes("email") || api.url.includes("mail")) {
+          setBody(
+            JSON.stringify(
+              {
+                from: "Om Shejul <om@arthkin.com>",
+                to: "Om Shejul <contact@omshejul.com>",
+                subject: "Test Email",
+                "body-type": "html",
+                body: "<!DOCTYPE html><html><head><title>Test Email</title></head><body><h1>Hello World!</h1><p>This is a test email with <strong>HTML content</strong>.</p></body></html>",
+              },
+              null,
+              2
+            )
+          );
+        }
       }
-    }
-  }, []);
+    },
+    []
+  );
 
-  const handleBodyChange = useCallback((newBody: string) => {
-    setBody(newBody);
-    let processedValue = newBody;
-    if (newBody.includes("```")) {
-      processedValue = processTripleBackticks(newBody);
-    }
-    validateJson(processedValue);
-  }, [processTripleBackticks, validateJson]);
+  const handleBodyChange = useCallback(
+    (newBody: string) => {
+      setBody(newBody);
+      let processedValue = newBody;
+      if (newBody.includes("```")) {
+        processedValue = processTripleBackticks(newBody);
+      }
+      validateJson(processedValue);
+    },
+    [processTripleBackticks, validateJson]
+  );
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800">
+    <div className="min-h-screen bg-background">
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
-        transition={{ duration: 0.5 }}
+        transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
         className="container mx-auto p-6"
       >
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.1 }}
+          transition={{ delay: 0.1, duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
           className="mb-8"
         >
           <div className="flex items-center justify-between mb-4">
             <div>
-              <h1 className="text-4xl font-bold text-gray-900 dark:text-white mb-2">
-                API Tester
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400">
+              <h1 className="text-4xl font-bold mb-2">API Tester</h1>
+              <p className="text-muted-foreground">
                 Test your APIs with a clean, modern interface
               </p>
             </div>
             <div className="flex items-center gap-3">
               <RequestHistory onLoadRequest={loadRequest} />
               <ExampleApis onSelectApi={selectExampleApi} />
+              <ThemeToggle />
             </div>
           </div>
           <motion.p
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
-            transition={{ delay: 0.3 }}
-            className="text-sm text-gray-500 dark:text-gray-500 bg-blue-50 dark:bg-blue-900/20 px-4 py-2 rounded-lg border border-blue-200 dark:border-blue-800"
+            transition={{ delay: 0.3, duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+            className="text-sm text-muted-foreground bg-muted px-4 py-2 rounded-lg border border-border"
           >
-            💡 Tip: Use <kbd className="px-2 py-1 bg-gray-200 dark:bg-gray-700 rounded text-xs">Ctrl/Cmd + Enter</kbd> to send requests quickly • 
-            Wrap HTML content with <code className="px-1 bg-gray-200 dark:bg-gray-700 rounded">```</code> for automatic escaping
+            💡 Tip: Use{" "}
+            <kbd className="px-2 py-1 bg-background rounded text-xs border border-border">
+              Ctrl/Cmd + Enter
+            </kbd>{" "}
+            to send requests quickly • Wrap HTML content with{" "}
+            <code className="px-1 bg-background rounded border border-border">
+              ```
+            </code>{" "}
+            for automatic escaping
           </motion.p>
         </motion.div>
 
@@ -273,7 +294,7 @@ export default function ApiTester() {
           <motion.div
             initial={{ opacity: 0, x: -50 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.2 }}
+            transition={{ delay: 0.2, duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
           >
             <RequestPanel
               method={method}
@@ -299,7 +320,7 @@ export default function ApiTester() {
           <motion.div
             initial={{ opacity: 0, x: 50 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.3, duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
           >
             <ResponsePanel
               response={response}
