@@ -41,6 +41,7 @@ export default function ApiTester() {
   const [jsonError, setJsonError] = useState<string | null>(null);
   const [showHtmlEditor, setShowHtmlEditor] = useState(false);
   const [htmlContent, setHtmlContent] = useState("");
+  const [requestSuccess, setRequestSuccess] = useState(false);
 
   const { saveRequest } = useLocalStorage();
 
@@ -121,6 +122,7 @@ export default function ApiTester() {
     setLoading(true);
     setError(null);
     setResponse(null);
+    setRequestSuccess(false);
 
     try {
       const startTime = Date.now();
@@ -164,6 +166,7 @@ export default function ApiTester() {
         data: responseData,
         time: endTime - startTime,
       });
+      setRequestSuccess(true);
     } catch (err) {
       setError(err instanceof Error ? err.message : "An error occurred");
     } finally {
@@ -354,6 +357,8 @@ export default function ApiTester() {
               htmlContent={htmlContent}
               setHtmlContent={setHtmlContent}
               onConvertHtmlToJson={convertHtmlToJson}
+              requestSuccess={requestSuccess}
+              requestError={error}
             />
           </motion.div>
 

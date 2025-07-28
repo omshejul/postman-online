@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Plus, X, Code, Eye } from "lucide-react";
+import { Send, Plus, X, Code, Eye, Check, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -32,6 +32,8 @@ interface RequestPanelProps {
   htmlContent: string;
   setHtmlContent: (content: string) => void;
   onConvertHtmlToJson: () => void;
+  requestSuccess?: boolean;
+  requestError?: string | null;
 }
 
 const HTTP_METHODS = [
@@ -65,8 +67,13 @@ export const RequestPanel = React.memo(function RequestPanel({
   htmlContent,
   setHtmlContent,
   onConvertHtmlToJson,
+  requestSuccess = false,
+  requestError = null,
 }: RequestPanelProps) {
   const [activeTab, setActiveTab] = useState<"json" | "html">("json");
+  const [buttonState, setButtonState] = useState<
+    "idle" | "loading" | "success" | "error"
+  >("idle");
 
   const hasBodySection = useMemo(
     () => METHODS_WITH_BODY.includes(method),
@@ -164,6 +171,86 @@ export const RequestPanel = React.memo(function RequestPanel({
 </html>`);
   }, [setHtmlContent]);
 
+  const handleSendRequest = useCallback(() => {
+    setButtonState("loading");
+    onSendRequest();
+  }, [onSendRequest]);
+
+  // Reset button state when loading changes
+  React.useEffect(() => {
+    if (!loading) {
+      if (requestSuccess) {
+        setButtonState("success");
+        setTimeout(() => setButtonState("idle"), 2000);
+      } else if (requestError) {
+        setButtonState("error");
+        setTimeout(() => setButtonState("idle"), 3000);
+      } else {
+        setButtonState("idle");
+      }
+    }
+  }, [loading, requestSuccess, requestError]);
+
+  const getButtonContent = () => {
+    switch (buttonState) {
+      case "loading":
+        return (
+          <>
+            <motion.div
+              animate={{ rotate: 360 }}
+              transition={{ duration: 1, repeat: Infinity, ease: "linear" }}
+              className="w-4 h-4 mr-2 border-2 border-current border-t-transparent rounded-full"
+            />
+            Sending...
+          </>
+        );
+      case "success":
+        return (
+          <>
+            <Check className="w-4 h-4 mr-2" />
+            Sent!
+          </>
+        );
+      case "error":
+        return (
+          <>
+            <AlertCircle className="w-4 h-4 mr-2" />
+            Error
+          </>
+        );
+      default:
+        return (
+          <>
+            <motion.div
+              animate={{
+                scale: [1, 1.1, 1],
+                opacity: [1, 0.8, 1],
+              }}
+              transition={{
+                duration: 2,
+                repeat: Infinity,
+                ease: "easeInOut",
+              }}
+            >
+              <Send className="w-4 h-4 mr-2" />
+            </motion.div>
+            Send
+          </>
+        );
+    }
+  };
+
+  const getButtonVariant = () => {
+    switch (buttonState) {
+      case "success":
+        return "default";
+      case "error":
+        return "destructive";
+      default:
+        return "default";
+    }
+  };
+
   return (
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center justify-between p-4 border-b border-border">
@@ -207,14 +294,105 @@ export const RequestPanel = React.memo(function RequestPanel({
             placeholder="Enter URL"
             className="flex-1"
           />
-          <Button
-            onClick={onSendRequest}
-            disabled={loading}
-            className="min-w-[80px]"
+          <motion.div
+            layout
+            whileHover={{
+              scale: 1.02,
+              boxShadow: "0 4px 12px rgba(0, 0, 0, 0.15)",
+            }}
+            whileTap={{ scale: 0.98 }}
+            whileFocus={{
+              scale: 1.01,
+              boxShadow: "0 0 0 3px rgba(59, 130, 246, 0.3)",
+            }}
+            transition={{
+              type: "spring",
+              stiffness: 400,
+              damping: 17,
+              layout: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
+            }}
           >
-            <Send className="w-4 h-4 mr-2" />
-            {loading ? "Sending..." : "Send"}
-          </Button>
+            <Button
+              onClick={handleSendRequest}
+              disabled={loading || buttonState === "loading"}
+              variant={getButtonVariant()}
+              className={cn(
+                "relative overflow-hidden transition-all duration-300 ease-out",
+                buttonState === "success" && "bg-green-600 hover:bg-green-700",
+                buttonState === "error" && "bg-red-600 hover:bg-red-700"
+              )}
+              style={{
+                width:
+                  buttonState === "loading"
+                    ? "110px"
+                    : buttonState === "success"
+                    ? "85px"
+                    : buttonState === "error"
+                    ? "85px"
+                    : "80px",
+                transition:
+                  "width 0.3s ease-out, background-color 0.3s ease-out",
+              }}
+            >
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key={buttonState}
+                  initial={{ opacity: 0, y: 10, scale: 0.95 }}
+                  animate={{ opacity: 1, y: 0, scale: 1 }}
+                  exit={{ opacity: 0, y: -10, scale: 0.95 }}
+                  transition={{
+                    duration: 0.25,
+                    delay: 0.05,
+                    ease: [0.4, 0, 0.2, 1],
+                    scale: { duration: 0.15 },
+                  }}
+                  className="flex items-center justify-center w-full"
+                >
+                  {getButtonContent()}
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Success ripple effect */}
+              {buttonState === "success" && (
+                <>
+                  <motion.div
+                    initial={{ scale: 0, opacity: 0.8 }}
+                    animate={{ scale: 2, opacity: 0 }}
+                    transition={{ duration: 0.6, ease: "easeOut" }}
+                    className="absolute inset-0 bg-green-400 rounded-md"
+                  />
+                  <motion.div
+                    initial={{ scale: 1, opacity: 0 }}
+                    animate={{
+                      scale: [1, 1.2, 1],
+                      opacity: [0, 0.3, 0],
+                    }}
+                    transition={{
+                      duration: 1.5,
+                      ease: "easeOut",
+                      repeat: 2,
+                    }}
+                    className="absolute inset-0 bg-green-300 rounded-md blur-sm"
+                  />
+                </>
+              )}
+
+              {/* Error shake effect */}
+              {buttonState === "error" && (
+                <motion.div
+                  animate={{
+                    x: [-2, 2, -2, 2, -2, 2, 0],
+                    rotate: [-1, 1, -1, 1, -1, 1, 0],
+                  }}
+                  transition={{
+                    duration: 0.5,
+                    ease: "easeInOut",
+                  }}
+                  className="absolute inset-0"
+                />
+              )}
+            </Button>
+          </motion.div>
         </motion.div>
 
         {/* Headers Section */}

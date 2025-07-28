@@ -10,6 +10,16 @@ import {
   Check,
   Code,
   Eye,
+  ArrowRight,
+  AlertTriangle,
+  Lock,
+  Ban,
+  Search,
+  Timer,
+  AlertCircle,
+  Server,
+  Wifi,
+  Wrench,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "./ui/button";
@@ -115,17 +125,62 @@ export function ResponsePanel({
             {/* Status */}
             <div className="flex items-center gap-4">
               <div
-                className={`flex items-center gap-2 ${getStatusColor(
+                className={`flex items-center gap-2 px-3 py-1.5 rounded-full border ${getStatusColor(
                   response.status
                 )}`}
               >
-                {response.status >= 200 && response.status < 300 ? (
-                  <CheckCircle className="w-5 h-5" />
-                ) : (
-                  <XCircle className="w-5 h-5" />
+                {response.status === 200 && <CheckCircle className="w-4 h-4" />}
+                {response.status === 201 && <CheckCircle className="w-4 h-4" />}
+                {response.status === 204 && <CheckCircle className="w-4 h-4" />}
+                {response.status === 301 && <ArrowRight className="w-4 h-4" />}
+                {response.status === 302 && <ArrowRight className="w-4 h-4" />}
+                {response.status === 304 && <ArrowRight className="w-4 h-4" />}
+                {response.status === 307 && <ArrowRight className="w-4 h-4" />}
+                {response.status === 308 && <ArrowRight className="w-4 h-4" />}
+                {response.status === 400 && (
+                  <AlertTriangle className="w-4 h-4" />
                 )}
-                <span className="font-mono font-semibold">
+                {response.status === 401 && <Lock className="w-4 h-4" />}
+                {response.status === 403 && <Ban className="w-4 h-4" />}
+                {response.status === 404 && <Search className="w-4 h-4" />}
+                {response.status === 405 && <Ban className="w-4 h-4" />}
+                {response.status === 408 && <Timer className="w-4 h-4" />}
+                {response.status === 409 && (
+                  <AlertTriangle className="w-4 h-4" />
+                )}
+                {response.status === 422 && (
+                  <AlertTriangle className="w-4 h-4" />
+                )}
+                {response.status === 429 && <Timer className="w-4 h-4" />}
+                {response.status === 500 && <Server className="w-4 h-4" />}
+                {response.status === 502 && <Wifi className="w-4 h-4" />}
+                {response.status === 503 && <Wrench className="w-4 h-4" />}
+                {response.status === 504 && <Timer className="w-4 h-4" />}
+                <span className="font-mono font-semibold text-sm">
                   {response.status} {response.statusText}
+                </span>
+                <span className="text-xs">
+                  {response.status === 200 && "OK"}
+                  {response.status === 201 && "Created"}
+                  {response.status === 204 && "No Content"}
+                  {response.status === 301 && "Moved Permanently"}
+                  {response.status === 302 && "Found"}
+                  {response.status === 304 && "Not Modified"}
+                  {response.status === 307 && "Temporary Redirect"}
+                  {response.status === 308 && "Permanent Redirect"}
+                  {response.status === 400 && "Bad Request"}
+                  {response.status === 401 && "Unauthorized"}
+                  {response.status === 403 && "Forbidden"}
+                  {response.status === 404 && "Not Found"}
+                  {response.status === 405 && "Method Not Allowed"}
+                  {response.status === 408 && "Request Timeout"}
+                  {response.status === 409 && "Conflict"}
+                  {response.status === 422 && "Unprocessable Entity"}
+                  {response.status === 429 && "Too Many Requests"}
+                  {response.status === 500 && "Internal Server Error"}
+                  {response.status === 502 && "Bad Gateway"}
+                  {response.status === 503 && "Service Unavailable"}
+                  {response.status === 504 && "Gateway Timeout"}
                 </span>
               </div>
               <div className="flex items-center gap-1 text-muted-foreground">
