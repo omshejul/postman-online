@@ -21,14 +21,14 @@ const jsonThemes = {
       base05: "#cccccc",
       base06: "#e6e6e6",
       base07: "#ffffff",
-      base08: "#ff5555", // red
-      base09: "#ffb86c", // numbers
-      base0A: "#f1fa8c", // boolean
-      base0B: "#50fa7b", // string
-      base0C: "#8be9fd", // date
-      base0D: "#bd93f9", // property
-      base0E: "#ff79c6", // null
-      base0F: "#ffb86c", // undefined
+      base08: "#ff5555", // Variables, XML Tags, Markup Link Text, Markup Lists, Diff Deleted
+      base09: "#ff9500", // Integers, Boolean, Constants, XML Attributes, Markup Link Url (Numbers - Orange)
+      base0A: "#f1fa8c", // Classes, Markup Bold, Search Text Background
+      base0B: "#50fa7b", // Strings, Inherited Class, Markup Code, Diff Inserted (Strings - Green)
+      base0C: "#8be9fd", // Support, Regular Expressions, Escape Characters, Markup Quotes
+      base0D: "#bd93f9", // Functions, Methods, Attribute IDs, Headings
+      base0E: "#ff79c6", // Keywords, Storage, Selector, Markup Italic, Diff Changed
+      base0F: "#ffb86c", // Deprecated, Opening/Closing Embedded Language Tags
     },
     light: {
       base00: "transparent",
@@ -39,14 +39,14 @@ const jsonThemes = {
       base05: "#333333",
       base06: "#222222",
       base07: "#111111",
-      base08: "#e45649", // red
-      base09: "#986801", // numbers
-      base0A: "#c18401", // boolean
-      base0B: "#50a14f", // string
-      base0C: "#0184bc", // date
-      base0D: "#4078f2", // property
-      base0E: "#a626a4", // null
-      base0F: "#986801", // undefined
+      base08: "#e45649", // Variables, XML Tags, Markup Link Text, Markup Lists, Diff Deleted
+      base09: "#d73a00", // Integers, Boolean, Constants, XML Attributes, Markup Link Url (Numbers - Dark Orange)
+      base0A: "#c18401", // Classes, Markup Bold, Search Text Background
+      base0B: "#50a14f", // Strings, Inherited Class, Markup Code, Diff Inserted (Strings - Green)
+      base0C: "#0184bc", // Support, Regular Expressions, Escape Characters, Markup Quotes
+      base0D: "#4078f2", // Functions, Methods, Attribute IDs, Headings
+      base0E: "#a626a4", // Keywords, Storage, Selector, Markup Italic, Diff Changed
+      base0F: "#986801", // Deprecated, Opening/Closing Embedded Language Tags
     },
   },
 };
