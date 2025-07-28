@@ -130,6 +130,10 @@ export default function ApiTester() {
       const headerObj: Record<string, string> = {};
       headers.forEach((header) => {
         if (header.key && header.value) {
+          // For GET requests, skip Content-Type header as it can cause CORS issues
+          if (method === "GET" && header.key.toLowerCase() === "content-type") {
+            return;
+          }
           headerObj[header.key] = header.value;
         }
       });
@@ -168,7 +172,35 @@ export default function ApiTester() {
       });
       setRequestSuccess(true);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "An error occurred");
+      let errorMessage = "An error occurred";
+
+      if (err instanceof Error) {
+        // Handle CORS errors specifically
+        if (
+          err.message.includes("CORS") ||
+          err.message.includes("Access-Control")
+        ) {
+          errorMessage = `CORS Error: ${err.message}`;
+        } else if (err.message.includes("Failed to fetch")) {
+          // Try to provide more helpful error messages for network issues
+          if (err.message.includes("ERR_NETWORK")) {
+            errorMessage =
+              "Network Error: Unable to connect to the server. Please check your internet connection and try again.";
+          } else if (err.message.includes("ERR_NAME_NOT_RESOLVED")) {
+            errorMessage =
+              "DNS Error: Unable to resolve the domain name. Please check the URL and try again.";
+          } else if (err.message.includes("ERR_CONNECTION_REFUSED")) {
+            errorMessage =
+              "Connection Refused: The server is not accepting connections. The server might be down or the URL might be incorrect.";
+          } else {
+            errorMessage = `Network Error: ${err.message}`;
+          }
+        } else {
+          errorMessage = err.message;
+        }
+      }
+
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

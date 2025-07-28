@@ -48,7 +48,7 @@ export function ResponsePanel({
   const [copied, setCopied] = React.useState(false);
   const [isRawView, setIsRawView] = React.useState(false);
 
-  const getStatusColor = (status: number) => {
+  const getStatusColor = (status: number): string => {
     if (status >= 200 && status < 300)
       return "text-green-600 dark:text-green-400";
     if (status >= 400 && status < 500)
@@ -56,6 +56,55 @@ export function ResponsePanel({
     if (status >= 500) return "text-destructive";
     return "text-muted-foreground";
   };
+
+  function getStatusText(status: number): string {
+    switch (status) {
+      case 200:
+        return "OK";
+      case 201:
+        return "Created";
+      case 204:
+        return "No Content";
+      case 301:
+        return "Moved Permanently";
+      case 302:
+        return "Found";
+      case 304:
+        return "Not Modified";
+      case 307:
+        return "Temporary Redirect";
+      case 308:
+        return "Permanent Redirect";
+      case 400:
+        return "Bad Request";
+      case 401:
+        return "Unauthorized";
+      case 403:
+        return "Forbidden";
+      case 404:
+        return "Not Found";
+      case 405:
+        return "Method Not Allowed";
+      case 408:
+        return "Request Timeout";
+      case 409:
+        return "Conflict";
+      case 422:
+        return "Unprocessable Entity";
+      case 429:
+        return "Too Many Requests";
+      case 500:
+        return "Internal Server Error";
+      case 502:
+        return "Bad Gateway";
+      case 503:
+        return "Service Unavailable";
+      case 504:
+        return "Gateway Timeout";
+      default:
+        return "";
+    }
+  }
 
   const handleCopy = async () => {
     if (!response) return;
@@ -112,6 +161,42 @@ export function ResponsePanel({
               <span className="font-medium">Error</span>
             </div>
             <p className="mt-1 text-destructive/80 text-sm">{error}</p>
+
+            {/* Show additional help for CORS errors */}
+            {error.includes("CORS") && (
+              <div className="mt-3 p-3 bg-muted/50 rounded-md border border-border">
+                <h4 className="text-sm font-medium text-foreground mb-2">
+                  CORS Error Help:
+                </h4>
+                <ul className="text-xs text-muted-foreground space-y-1">
+                  <li>• The server doesn't allow requests from your domain</li>
+                  <li>
+                    • Try removing custom headers (especially Content-Type for
+                    GET requests)
+                  </li>
+                  <li>• Some APIs require specific CORS headers to be set</li>
+                  <li>
+                    • Consider using a CORS proxy or testing with a different
+                    API
+                  </li>
+                </ul>
+              </div>
+            )}
+
+            {/* Show additional help for network errors */}
+            {error.includes("Network Error") && (
+              <div className="mt-3 p-3 bg-muted/50 rounded-md border border-border">
+                <h4 className="text-sm font-medium text-foreground mb-2">
+                  Network Error Help:
+                </h4>
+                <ul className="text-xs text-muted-foreground space-y-1">
+                  <li>• Check your internet connection</li>
+                  <li>• Verify the URL is correct and accessible</li>
+                  <li>• The server might be down or unreachable</li>
+                  <li>• Try again in a few moments</li>
+                </ul>
+              </div>
+            )}
           </motion.div>
         )}
 
@@ -156,31 +241,11 @@ export function ResponsePanel({
                 {response.status === 502 && <Wifi className="w-4 h-4" />}
                 {response.status === 503 && <Wrench className="w-4 h-4" />}
                 {response.status === 504 && <Timer className="w-4 h-4" />}
-                <span className="font-mono font-semibold text-sm">
-                  {response.status} {response.statusText}
-                </span>
-                <span className="text-xs">
-                  {response.status === 200 && "OK"}
-                  {response.status === 201 && "Created"}
-                  {response.status === 204 && "No Content"}
-                  {response.status === 301 && "Moved Permanently"}
-                  {response.status === 302 && "Found"}
-                  {response.status === 304 && "Not Modified"}
-                  {response.status === 307 && "Temporary Redirect"}
-                  {response.status === 308 && "Permanent Redirect"}
-                  {response.status === 400 && "Bad Request"}
-                  {response.status === 401 && "Unauthorized"}
-                  {response.status === 403 && "Forbidden"}
-                  {response.status === 404 && "Not Found"}
-                  {response.status === 405 && "Method Not Allowed"}
-                  {response.status === 408 && "Request Timeout"}
-                  {response.status === 409 && "Conflict"}
-                  {response.status === 422 && "Unprocessable Entity"}
-                  {response.status === 429 && "Too Many Requests"}
-                  {response.status === 500 && "Internal Server Error"}
-                  {response.status === 502 && "Bad Gateway"}
-                  {response.status === 503 && "Service Unavailable"}
-                  {response.status === 504 && "Gateway Timeout"}
+                <span className="flex items-baseline gap-1 font-mono text-sm">
+                  <span className="font-bold">{response.status}</span>
+                  <span className="font-extrabold font-sans">
+                    {response.statusText || getStatusText(response.status)}
+                  </span>
                 </span>
               </div>
               <div className="flex items-center gap-1 text-muted-foreground">
