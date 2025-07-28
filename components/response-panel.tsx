@@ -16,7 +16,6 @@ import {
   Ban,
   Search,
   Timer,
-  AlertCircle,
   Server,
   Wifi,
   Wrench,
@@ -169,7 +168,9 @@ export function ResponsePanel({
                   CORS Error Help:
                 </h4>
                 <ul className="text-xs text-muted-foreground space-y-1">
-                  <li>• The server doesn't allow requests from your domain</li>
+                  <li>
+                    • The server doesn&apos;t allow requests from your domain
+                  </li>
                   <li>
                     • Try removing custom headers (especially Content-Type for
                     GET requests)
