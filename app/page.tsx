@@ -304,26 +304,9 @@ export default function ApiTester() {
                 Test your APIs with a clean, modern interface
               </p>
             </div>
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 ">
               <RequestHistory onLoadRequest={loadRequest} />
               <ExampleApis onSelectApi={selectExampleApi} />
-              {/* Test button to verify state updates work */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  console.log(
-                    "Test button clicked - calling selectExampleApi directly"
-                  );
-                  selectExampleApi({
-                    name: "Test Direct Call",
-                    method: "GET",
-                    url: "https://jsonplaceholder.typicode.com/posts/1",
-                  });
-                }}
-              >
-                🧪 Test
-              </Button>
               <ThemeToggle />
             </div>
           </div>

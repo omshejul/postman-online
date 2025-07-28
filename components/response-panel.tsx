@@ -2,8 +2,10 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Clock, CheckCircle, XCircle } from "lucide-react";
+import { Clock, CheckCircle, XCircle, Copy, Check } from "lucide-react";
 import { Card } from "@/components/ui/card";
+import { Button } from "./ui/button";
+import { toast } from "sonner";
 
 interface ApiResponse {
   status: number;
@@ -24,6 +26,8 @@ export function ResponsePanel({
   loading,
   error,
 }: ResponsePanelProps) {
+  const [copied, setCopied] = React.useState(false);
+
   const getStatusColor = (status: number) => {
     if (status >= 200 && status < 300)
       return "text-green-600 dark:text-green-400";
@@ -31,6 +35,30 @@ export function ResponsePanel({
       return "text-yellow-600 dark:text-yellow-400";
     if (status >= 500) return "text-destructive";
     return "text-muted-foreground";
+  };
+
+  const handleCopy = async () => {
+    if (!response) return;
+
+    try {
+      const text =
+        typeof response.data === "object"
+          ? JSON.stringify(response.data, null, 2)
+          : String(response.data);
+
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      toast.success("Copied to clipboard!", {
+        description: "Response data has been copied to your clipboard",
+        duration: 2000,
+      });
+
+      setTimeout(() => setCopied(false), 2000);
+    } catch (error) {
+      toast.error("Failed to copy", {
+        description: "Unable to copy to clipboard",
+      });
+    }
   };
 
   return (
@@ -98,7 +126,7 @@ export function ResponsePanel({
 
             {/* Response Headers */}
             <div>
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <h3 className="text-sm font-medium text-muted-foreground mb-2">
                 Response Headers
               </h3>
               <Card className="rounded-md p-3 max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
@@ -113,18 +141,33 @@ export function ResponsePanel({
 
             {/* Response Body */}
             <div>
-              <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <h3 className="text-sm font-medium text-muted-foreground mb-2">
                 Response Body
               </h3>
-              <Card className="rounded-md p-3 text-sm font-mono text-foreground overflow-x-auto max-h-96 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
-                <pre
-                  className="
-                text-sm font-mono overflow-x-auto max-h-96 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent"
+              <Card className="rounded-md relative overflow-hidden">
+                <div className="relative">
+                  <pre className="text-sm font-mono overflow-x-auto max-h-96 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent p-3 pt-6 pb-6">
+                    {typeof response.data === "object"
+                      ? JSON.stringify(response.data, null, 2)
+                      : String(response.data)}
+                  </pre>
+                </div>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="absolute top-2 right-2 h-8 w-8 hover:bg-accent z-10"
+                  onClick={handleCopy}
                 >
-                  {typeof response.data === "object"
-                    ? JSON.stringify(response.data, null, 2)
-                    : String(response.data)}
-                </pre>
+                  {copied ? (
+                    <Check className="h-4 w-4 text-green-500" />
+                  ) : (
+                    <Copy className="h-4 w-4" />
+                  )}
+                </Button>
+                {/* Top gradient */}
+                <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-background to-transparent pointer-events-none" />
+                {/* Bottom gradient */}
+                <div className="absolute bottom-0 left-0 right-0 h-6 bg-gradient-to-t from-background to-transparent pointer-events-none" />
               </Card>
             </div>
           </motion.div>

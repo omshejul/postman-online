@@ -160,27 +160,8 @@ export default function ExampleApis({ onSelectApi }: ExampleApisProps) {
             </div>
           </div>
         </DropdownMenuLabel>
-        <DropdownMenuSeparator />
 
-        {/* Test item - direct click */}
-        <DropdownMenuItem
-          onClick={() => {
-            console.log("Test item clicked!");
-            handleSelectApi({
-              name: "Test API",
-              method: "GET",
-              url: "https://jsonplaceholder.typicode.com/posts/1",
-              description: "Test",
-              category: "Test",
-            });
-          }}
-          className="flex items-center gap-2 cursor-pointer"
-        >
-          <span className="px-2 py-1 text-xs font-mono rounded bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
-            GET
-          </span>
-          <span className="font-medium">🧪 Test Quick Load</span>
-        </DropdownMenuItem>
+
         <DropdownMenuSeparator />
 
         {/* Simplified flat structure for testing */}
