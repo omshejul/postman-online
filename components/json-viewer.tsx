@@ -1,8 +1,16 @@
 "use client";
 
 import React from "react";
-import ReactJson from "react-json-view";
 import { useTheme } from "next-themes";
+import dynamic from "next/dynamic";
+
+// Dynamically import ReactJson to avoid SSR issues
+const ReactJson = dynamic(() => import("react-json-view"), {
+  ssr: false,
+  loading: () => (
+    <div className="text-muted-foreground">Loading JSON viewer...</div>
+  ),
+});
 
 interface JsonViewerProps {
   data: unknown;
