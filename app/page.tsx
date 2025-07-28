@@ -229,8 +229,8 @@ export default function ApiTester() {
           setBody(
             JSON.stringify(
               {
-                from: "Om Shejul <om@arthkin.com>",
-                to: "Om Shejul <contact@omshejul.com>",
+                from: "John Doe <sender@example.com>",
+                to: "Jane Smith <recipient@example.com>",
                 subject: "Test Email",
                 "body-type": "html",
                 body: "<!DOCTYPE html><html><head><title>Test Email</title></head><body><h1>Hello World!</h1><p>This is a test email with <strong>HTML content</strong>.</p></body></html>",
