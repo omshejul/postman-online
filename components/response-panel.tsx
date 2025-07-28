@@ -2,9 +2,18 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import { Clock, CheckCircle, XCircle, Copy, Check } from "lucide-react";
+import {
+  Clock,
+  CheckCircle,
+  XCircle,
+  Copy,
+  Check,
+  Code,
+  Eye,
+} from "lucide-react";
 import { Card } from "@/components/ui/card";
 import { Button } from "./ui/button";
+import { JsonViewer } from "./json-viewer";
 import { toast } from "sonner";
 
 interface ApiResponse {
@@ -27,6 +36,7 @@ export function ResponsePanel({
   error,
 }: ResponsePanelProps) {
   const [copied, setCopied] = React.useState(false);
+  const [isRawView, setIsRawView] = React.useState(false);
 
   const getStatusColor = (status: number) => {
     if (status >= 200 && status < 300)
@@ -146,24 +156,59 @@ export function ResponsePanel({
               </h3>
               <Card className="rounded-md relative overflow-hidden">
                 <div className="relative">
-                  <pre className="text-sm font-mono overflow-x-auto max-h-96 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent p-3 pt-6 pb-6">
-                    {typeof response.data === "object"
-                      ? JSON.stringify(response.data, null, 2)
-                      : String(response.data)}
-                  </pre>
+                  <div className="text-sm overflow-x-auto max-h-96 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent p-3 pt-6 pb-6">
+                    {typeof response.data === "object" ? (
+                      <JsonViewer
+                        data={response.data}
+                        className="text-sm"
+                        isRawView={isRawView}
+                        onToggleView={setIsRawView}
+                      />
+                    ) : (
+                      <pre className="font-mono">{String(response.data)}</pre>
+                    )}
+                  </div>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  className="absolute top-2 right-2 h-8 w-8 hover:bg-accent z-10"
-                  onClick={handleCopy}
-                >
-                  {copied ? (
-                    <Check className="h-4 w-4 text-green-500" />
-                  ) : (
-                    <Copy className="h-4 w-4" />
+                <div className="absolute top-2 right-2 flex gap-2 z-10">
+                  {typeof response.data === "object" && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      className="h-8 hover:bg-accent gap-1.5"
+                      onClick={() => setIsRawView(!isRawView)}
+                    >
+                      {isRawView ? (
+                        <>
+                          <Eye className="h-4 w-4" />
+                          <span className="text-xs">Pretty</span>
+                        </>
+                      ) : (
+                        <>
+                          <Code className="h-4 w-4" />
+                          <span className="text-xs">Raw</span>
+                        </>
+                      )}
+                    </Button>
                   )}
-                </Button>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    className="h-8 hover:bg-accent gap-1.5"
+                    onClick={handleCopy}
+                  >
+                    {copied ? (
+                      <>
+                        <Check className="h-4 w-4 text-green-500" />
+                        <span className="text-xs">Copied</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy className="h-4 w-4" />
+                        <span className="text-xs">Copy</span>
+                      </>
+                    )}
+                  </Button>
+                </div>
                 {/* Top gradient */}
                 <div className="absolute top-0 left-0 right-0 h-6 bg-gradient-to-b from-background to-transparent pointer-events-none" />
                 {/* Bottom gradient */}
