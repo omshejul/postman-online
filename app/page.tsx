@@ -7,7 +7,9 @@ import { ResponsePanel } from "@/components/response-panel";
 import RequestHistory from "@/components/request-history";
 import ExampleApis from "@/components/example-apis";
 import { ThemeToggle } from "@/components/theme-toggle";
+import { Button } from "@/components/ui/button";
 import { useLocalStorage } from "@/hooks/use-local-storage";
+import { useRequestState } from "@/hooks/use-request-state";
 
 interface ApiResponse {
   status: number;
@@ -17,20 +19,23 @@ interface ApiResponse {
   time: number;
 }
 
-interface Header {
-  key: string;
-  value: string;
-}
-
 export default function ApiTester() {
-  const [method, setMethod] = useState("GET");
-  const [url, setUrl] = useState(
-    "https://jsonplaceholder.typicode.com/posts/1"
-  );
-  const [headers, setHeaders] = useState<Header[]>([
-    { key: "Content-Type", value: "application/json" },
-  ]);
-  const [body, setBody] = useState("");
+  // Request state managed in cookies
+  const {
+    method,
+    url,
+    headers,
+    body,
+    setMethod,
+    setUrl,
+    setHeaders,
+    setBody,
+    loadRequest: loadRequestState,
+    clearState,
+    isLoaded,
+  } = useRequestState();
+
+  // Local UI state
   const [response, setResponse] = useState<ApiResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -87,7 +92,7 @@ export default function ApiTester() {
     } catch {
       setJsonError("Failed to convert HTML to JSON");
     }
-  }, [body, htmlContent]);
+  }, [body, htmlContent, setBody]);
 
   const handleSaveRequest = useCallback(() => {
     const savedRequest = saveRequest({
@@ -165,7 +170,15 @@ export default function ApiTester() {
     } finally {
       setLoading(false);
     }
-  }, [method, url, headers, body, processTripleBackticks, validateJson]);
+  }, [
+    method,
+    url,
+    headers,
+    body,
+    processTripleBackticks,
+    validateJson,
+    setBody,
+  ]);
 
   const loadRequest = useCallback(
     (request: {
@@ -174,18 +187,20 @@ export default function ApiTester() {
       headers: Array<{ key: string; value: string }>;
       body: string;
     }) => {
-      setMethod(request.method);
-      setUrl(request.url);
-      setHeaders(request.headers);
-      setBody(request.body);
+      loadRequestState(request);
     },
-    []
+    [loadRequestState]
   );
 
   const selectExampleApi = useCallback(
-    (api: { method: string; url: string }) => {
+    (api: { name: string; method: string; url: string }) => {
+      console.log("selectExampleApi called with:", api);
+
       setMethod(api.method);
       setUrl(api.url);
+
+      // Reset headers to default for the new request
+      setHeaders([{ key: "Content-Type", value: "application/json" }]);
 
       if (["POST", "PUT", "PATCH"].includes(api.method)) {
         if (api.url.includes("jsonplaceholder")) {
@@ -225,10 +240,22 @@ export default function ApiTester() {
               2
             )
           );
+        } else {
+          // For GET requests or other APIs, clear the body
+          setBody("");
         }
+      } else {
+        // For GET requests, clear the body
+        setBody("");
       }
+
+      console.log("State should be updated to:", {
+        method: api.method,
+        url: api.url,
+        headers: [{ key: "Content-Type", value: "application/json" }],
+      });
     },
-    []
+    [setMethod, setUrl, setHeaders, setBody]
   );
 
   const handleBodyChange = useCallback(
@@ -240,8 +267,20 @@ export default function ApiTester() {
       }
       validateJson(processedValue);
     },
-    [processTripleBackticks, validateJson]
+    [processTripleBackticks, validateJson, setBody]
   );
+
+  // Don't render until cookie state is loaded
+  if (!isLoaded) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="flex items-center gap-3">
+          <div className="w-6 h-6 border-2 border-border border-t-transparent rounded-full animate-spin" />
+          <span className="text-muted-foreground">Loading...</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-background">
@@ -268,6 +307,23 @@ export default function ApiTester() {
             <div className="flex items-center gap-3">
               <RequestHistory onLoadRequest={loadRequest} />
               <ExampleApis onSelectApi={selectExampleApi} />
+              {/* Test button to verify state updates work */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  console.log(
+                    "Test button clicked - calling selectExampleApi directly"
+                  );
+                  selectExampleApi({
+                    name: "Test Direct Call",
+                    method: "GET",
+                    url: "https://jsonplaceholder.typicode.com/posts/1",
+                  });
+                }}
+              >
+                🧪 Test
+              </Button>
               <ThemeToggle />
             </div>
           </div>
@@ -281,7 +337,8 @@ export default function ApiTester() {
             <kbd className="px-2 py-1 bg-background rounded text-xs border border-border">
               Ctrl/Cmd + Enter
             </kbd>{" "}
-            to send requests quickly • Wrap HTML content with{" "}
+            to send requests quickly • Your work is automatically saved and
+            restored • Wrap HTML content with{" "}
             <code className="px-1 bg-background rounded border border-border">
               ```
             </code>{" "}
@@ -308,6 +365,7 @@ export default function ApiTester() {
               loading={loading}
               onSendRequest={sendRequest}
               onSaveRequest={handleSaveRequest}
+              onClearState={clearState}
               jsonError={jsonError}
               showHtmlEditor={showHtmlEditor}
               setShowHtmlEditor={setShowHtmlEditor}

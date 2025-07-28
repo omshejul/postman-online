@@ -25,10 +25,12 @@ export function ResponsePanel({
   error,
 }: ResponsePanelProps) {
   const getStatusColor = (status: number) => {
-    if (status >= 200 && status < 300) return "text-green-600";
-    if (status >= 400 && status < 500) return "text-yellow-600";
-    if (status >= 500) return "text-red-600";
-    return "text-gray-600";
+    if (status >= 200 && status < 300)
+      return "text-green-600 dark:text-green-400";
+    if (status >= 400 && status < 500)
+      return "text-yellow-600 dark:text-yellow-400";
+    if (status >= 500) return "text-destructive";
+    return "text-muted-foreground";
   };
 
   return (
@@ -44,7 +46,7 @@ export function ResponsePanel({
             className="flex items-center justify-center py-8"
           >
             <div className="w-8 h-8 border-4 border-border border-t-transparent rounded-full animate-spin" />
-            <span className="ml-3 text-gray-600 dark:text-gray-400">
+            <span className="ml-3 text-muted-foreground">
               Sending request...
             </span>
           </motion.div>
@@ -55,15 +57,13 @@ export function ResponsePanel({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            className="bg-red-50 dark:bg-red-900/20 border border-border rounded-md p-4"
+            className="bg-destructive/10 border border-destructive/20 rounded-md p-4"
           >
-            <div className="flex items-center gap-2 text-red-800 dark:text-red-200">
+            <div className="flex items-center gap-2 text-destructive">
               <XCircle className="w-5 h-5" />
               <span className="font-medium">Error</span>
             </div>
-            <p className="mt-1 text-red-700 dark:text-red-300 text-sm">
-              {error}
-            </p>
+            <p className="mt-1 text-destructive/80 text-sm">{error}</p>
           </motion.div>
         )}
 
@@ -90,7 +90,7 @@ export function ResponsePanel({
                   {response.status} {response.statusText}
                 </span>
               </div>
-              <div className="flex items-center gap-1 text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-1 text-muted-foreground">
                 <Clock className="w-4 h-4" />
                 <span className="text-sm">{response.time}ms</span>
               </div>
@@ -104,9 +104,7 @@ export function ResponsePanel({
               <Card className="rounded-md p-3 max-h-32 overflow-y-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
                 {Object.entries(response.headers).map(([key, value]) => (
                   <div key={key} className="text-sm font-mono">
-                    <span className="text-gray-600 dark:text-gray-400">
-                      {key}:
-                    </span>{" "}
+                    <span className="text-muted-foreground">{key}:</span>{" "}
                     <span className="text-foreground">{value}</span>
                   </div>
                 ))}

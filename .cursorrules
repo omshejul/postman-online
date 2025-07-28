@@ -174,10 +174,8 @@ export async function GET(request: NextRequest) {
 
 ## Development Workflow
 
-- Use `npm run dev` for development
-- Use `npm run build` for production build
 - Use `npm run lint` for linting
-- Use `npm run start` for production server
+- Dont run npm run dev automatically 
 
 ## Best Practices
 

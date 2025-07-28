@@ -25,6 +25,7 @@ interface RequestPanelProps {
   loading: boolean;
   onSendRequest: () => void;
   onSaveRequest: () => void;
+  onClearState?: () => void;
   jsonError: string | null;
   showHtmlEditor: boolean;
   setShowHtmlEditor: (show: boolean) => void;
@@ -57,6 +58,7 @@ export const RequestPanel = React.memo(function RequestPanel({
   loading,
   onSendRequest,
   onSaveRequest,
+  onClearState,
   jsonError,
   showHtmlEditor,
   setShowHtmlEditor,
@@ -166,9 +168,16 @@ export const RequestPanel = React.memo(function RequestPanel({
     <Card className="w-full">
       <CardHeader className="flex flex-row items-center justify-between p-4 border-b border-border">
         <CardTitle className="text-lg font-semibold">Request</CardTitle>
-        <Button variant="ghost" size="sm" onClick={onSaveRequest}>
-          Save
-        </Button>
+        <div className="flex items-center gap-2">
+          {onClearState && (
+            <Button variant="ghost" size="sm" onClick={onClearState}>
+              Clear
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" onClick={onSaveRequest}>
+            Save
+          </Button>
+        </div>
       </CardHeader>
 
       <CardContent className="p-6 space-y-6">

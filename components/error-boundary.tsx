@@ -26,7 +26,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: React.ErrorInfo) {
-    console.error('Error caught by boundary:', error, errorInfo);
+    console.error("Error caught by boundary:", error, errorInfo);
   }
 
   render() {
@@ -43,17 +43,21 @@ export class ErrorBoundary extends React.Component<Props, State> {
                 <motion.div
                   initial={{ scale: 0 }}
                   animate={{ scale: 1 }}
-                  transition={{ delay: 0.1, duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
+                  transition={{
+                    delay: 0.1,
+                    duration: 0.2,
+                    ease: [0.4, 0, 0.2, 1],
+                  }}
                   className="mx-auto w-12 h-12 bg-red-100 dark:bg-red-900/20 rounded-full flex items-center justify-center mb-4"
                 >
-                  <AlertTriangle className="w-6 h-6 text-red-600 dark:text-red-400" />
+                  <AlertTriangle className="w-6 h-6 text-destructive" />
                 </motion.div>
                 <CardTitle className="text-red-900 dark:text-red-100">
                   Something went wrong
                 </CardTitle>
               </CardHeader>
               <CardContent className="text-center space-y-4">
-                <p className="text-gray-600 dark:text-gray-400 text-sm">
+                <p className="text-muted-foreground text-sm">
                   An unexpected error occurred while running the application.
                 </p>
                 {this.state.error && (
@@ -69,7 +73,7 @@ export class ErrorBoundary extends React.Component<Props, State> {
                 <Button
                   onClick={() => window.location.reload()}
                   className="w-full"
-                  variant="blue"
+                  variant="default"
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Reload Page

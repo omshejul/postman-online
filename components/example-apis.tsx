@@ -9,9 +9,6 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuSeparator,
-  DropdownMenuSub,
-  DropdownMenuSubContent,
-  DropdownMenuSubTrigger,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 
@@ -130,24 +127,9 @@ const getMethodColor = (method: string) => {
 };
 
 export default function ExampleApis({ onSelectApi }: ExampleApisProps) {
-  const categories = useMemo(
-    () => [...new Set(exampleApis.map((api) => api.category))],
-    []
-  );
-
-  const categorizedApis = useMemo(() => {
-    const grouped: Record<string, ExampleApi[]> = {};
-    exampleApis.forEach((api) => {
-      if (!grouped[api.category]) {
-        grouped[api.category] = [];
-      }
-      grouped[api.category].push(api);
-    });
-    return grouped;
-  }, []);
-
   const handleSelectApi = useCallback(
     (api: ExampleApi) => {
+      console.log("Example API selected:", api);
       onSelectApi({
         name: api.name,
         method: api.method,
@@ -180,40 +162,54 @@ export default function ExampleApis({ onSelectApi }: ExampleApisProps) {
         </DropdownMenuLabel>
         <DropdownMenuSeparator />
 
-        {categories.map((category) => (
-          <DropdownMenuSub key={category}>
-            <DropdownMenuSubTrigger className="flex items-center">
-              <span className="font-medium">{category}</span>
-            </DropdownMenuSubTrigger>
-            <DropdownMenuSubContent className="w-72">
-              {categorizedApis[category].map((api, index) => (
-                <DropdownMenuItem
-                  key={index}
-                  onClick={() => handleSelectApi(api)}
-                  className="flex flex-col items-start p-3 cursor-pointer"
-                >
-                  <div className="flex items-center gap-2 mb-1 w-full">
-                    <span
-                      className={`px-2 py-1 text-xs font-mono rounded ${getMethodColor(
-                        api.method
-                      )}`}
-                    >
-                      {api.method}
-                    </span>
-                    <span className="font-medium text-foreground">
-                      {api.name}
-                    </span>
-                  </div>
-                  <div className="text-sm text-muted-foreground truncate font-mono w-full">
-                    {api.url}
-                  </div>
-                  <div className="text-xs text-muted-foreground mt-1">
-                    {api.description}
-                  </div>
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuSubContent>
-          </DropdownMenuSub>
+        {/* Test item - direct click */}
+        <DropdownMenuItem
+          onClick={() => {
+            console.log("Test item clicked!");
+            handleSelectApi({
+              name: "Test API",
+              method: "GET",
+              url: "https://jsonplaceholder.typicode.com/posts/1",
+              description: "Test",
+              category: "Test",
+            });
+          }}
+          className="flex items-center gap-2 cursor-pointer"
+        >
+          <span className="px-2 py-1 text-xs font-mono rounded bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200">
+            GET
+          </span>
+          <span className="font-medium">🧪 Test Quick Load</span>
+        </DropdownMenuItem>
+        <DropdownMenuSeparator />
+
+        {/* Simplified flat structure for testing */}
+        {exampleApis.slice(0, 8).map((api, index) => (
+          <DropdownMenuItem
+            key={index}
+            onClick={() => {
+              console.log("API clicked:", api);
+              handleSelectApi(api);
+            }}
+            className="flex flex-col items-start p-3 cursor-pointer"
+          >
+            <div className="flex items-center gap-2 mb-1 w-full">
+              <span
+                className={`px-2 py-1 text-xs font-mono rounded ${getMethodColor(
+                  api.method
+                )}`}
+              >
+                {api.method}
+              </span>
+              <span className="font-medium text-foreground">{api.name}</span>
+            </div>
+            <div className="text-sm text-muted-foreground truncate font-mono w-full">
+              {api.url}
+            </div>
+            <div className="text-xs text-muted-foreground mt-1">
+              {api.description}
+            </div>
+          </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
     </DropdownMenu>

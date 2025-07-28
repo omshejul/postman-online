@@ -19,7 +19,7 @@ export const metadata: Metadata = {
   description:
     "Test your APIs with a clean, modern interface. Built with Next.js, React, and Tailwind CSS.",
   keywords: ["API", "testing", "Postman", "REST", "HTTP", "developer tools"],
-  authors: [{ name: "Om Shejul", email: "om@arthkin.com" }],
+  authors: [{ name: "Om Shejul" }],
   creator: "Om Shejul",
   openGraph: {
     title: "API Tester - Modern Postman Alternative",
