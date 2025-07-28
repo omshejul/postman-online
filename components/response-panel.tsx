@@ -64,7 +64,7 @@ export function ResponsePanel({
       });
 
       setTimeout(() => setCopied(false), 2000);
-    } catch (error) {
+    } catch {
       toast.error("Failed to copy", {
         description: "Unable to copy to clipboard",
       });
@@ -162,7 +162,6 @@ export function ResponsePanel({
                         data={response.data}
                         className="text-sm"
                         isRawView={isRawView}
-                        onToggleView={setIsRawView}
                       />
                     ) : (
                       <pre className="font-mono">{String(response.data)}</pre>

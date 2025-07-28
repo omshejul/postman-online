@@ -7,7 +7,6 @@ import { ResponsePanel } from "@/components/response-panel";
 import RequestHistory from "@/components/request-history";
 import ExampleApis from "@/components/example-apis";
 import { ThemeToggle } from "@/components/theme-toggle";
-import { Button } from "@/components/ui/button";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useRequestState } from "@/hooks/use-request-state";
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useMemo } from "react";
+import React, { useCallback } from "react";
 import { Zap } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -160,7 +160,6 @@ export default function ExampleApis({ onSelectApi }: ExampleApisProps) {
             </div>
           </div>
         </DropdownMenuLabel>
-
 
         <DropdownMenuSeparator />
 

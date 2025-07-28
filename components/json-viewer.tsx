@@ -7,7 +7,6 @@ import { useTheme } from "next-themes";
 interface JsonViewerProps {
   data: unknown;
   className?: string;
-  onToggleView?: (isRaw: boolean) => void;
   isRawView?: boolean;
 }
 
@@ -52,24 +51,21 @@ const jsonThemes = {
   },
 };
 
-export function JsonViewer({ data, className, onToggleView, isRawView = false }: JsonViewerProps) {
+export function JsonViewer({
+  data,
+  className,
+  isRawView = false,
+}: JsonViewerProps) {
   const { theme, systemTheme } = useTheme();
   const isDark = theme === "system" ? systemTheme === "dark" : theme === "dark";
-
-  const handleToggle = () => {
-    const newValue = !isRawView;
-    onToggleView?.(newValue);
-  };
 
   return (
     <div className={className}>
       {isRawView ? (
-        <pre className="font-mono text-sm">
-          {JSON.stringify(data, null, 2)}
-        </pre>
+        <pre className="font-mono text-sm">{JSON.stringify(data, null, 2)}</pre>
       ) : (
         <ReactJson
-          src={data as any}
+          src={data as object}
           theme={jsonThemes.dracula[isDark ? "dark" : "light"]}
           name={null}
           displayDataTypes={false}

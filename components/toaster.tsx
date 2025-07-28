@@ -8,7 +8,7 @@ export function Toaster() {
 
   return (
     <Sonner
-      theme={theme as any}
+      theme={theme as "light" | "dark" | "system"}
       toastOptions={{
         style: {
           backgroundColor: "var(--accent)",
