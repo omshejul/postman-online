@@ -1,18 +1,7 @@
 "use client";
 
 import React, { useCallback } from "react";
-import {
-  Zap,
-  ChevronRight,
-  Globe,
-  Cloud,
-  Database,
-  TestTube,
-  Mail,
-  MapPin,
-  Currency,
-  Gamepad2,
-} from "lucide-react";
+import { Zap, Globe, Cloud, Database, TestTube, Currency } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
