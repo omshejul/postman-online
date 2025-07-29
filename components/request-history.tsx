@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 import { History, Trash2, Play } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
@@ -34,6 +34,7 @@ const getMethodColor = (method: string) => {
 
 export default function RequestHistory({ onLoadRequest }: RequestHistoryProps) {
   const { requests, deleteRequest, clearHistory } = useLocalStorage();
+  const [isOpen, setIsOpen] = useState(false);
 
   const handleLoadRequest = useCallback(
     (request: SavedRequest) => {
@@ -43,6 +44,7 @@ export default function RequestHistory({ onLoadRequest }: RequestHistoryProps) {
         headers: request.headers,
         body: request.body,
       });
+      setIsOpen(false); // Close dropdown after loading
     },
     [onLoadRequest]
   );
@@ -59,7 +61,7 @@ export default function RequestHistory({ onLoadRequest }: RequestHistoryProps) {
   }, [clearHistory]);
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
@@ -92,7 +94,7 @@ export default function RequestHistory({ onLoadRequest }: RequestHistoryProps) {
             No saved requests
           </div>
         ) : (
-          <div className="max-h-80 overflow-y-auto">
+          <div className="max-h-80 overflow-y-auto scrollbar-hide">
             {requests.map((request) => (
               <div key={request.id} className="p-2">
                 <div className="flex items-center justify-between mb-2">
