@@ -4,7 +4,7 @@ export interface SavedRequest {
   id: string;
   method: string;
   url: string;
-  headers: Array<{ key: string; value: string }>;
+  headers: Array<{ id: string; key: string; value: string }>;
   body: string;
   timestamp: number;
 }

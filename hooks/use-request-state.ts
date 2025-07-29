@@ -2,8 +2,10 @@
 
 import { useState, useEffect, useCallback } from "react";
 import Cookies from "js-cookie";
+import { generateId } from "@/lib/utils";
 
 interface Header {
+  id: string;
   key: string;
   value: string;
 }
@@ -25,8 +27,10 @@ const COOKIE_OPTIONS = {
 
 const DEFAULT_STATE: RequestState = {
   method: "GET",
-  url: "https://jsonplaceholder.typicode.com/posts/1",
-  headers: [{ key: "Content-Type", value: "application/json" }],
+  url: "",
+  headers: [
+    { id: generateId(), key: "Content-Type", value: "application/json" },
+  ],
   body: "",
 };
 
