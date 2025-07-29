@@ -2,7 +2,15 @@
 
 import React, { useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Send, Plus, X, Code, Eye, Check, AlertCircle } from "lucide-react";
+import {
+  Send,
+  Plus,
+  Delete,
+  Code,
+  Eye,
+  Check,
+  AlertCircle,
+} from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -270,9 +278,6 @@ export const RequestPanel = React.memo(function RequestPanel({
               Clear
             </Button>
           )}
-          <Button variant="ghost" size="sm" onClick={onSaveRequest}>
-            Save
-          </Button>
         </div>
       </CardHeader>
 
@@ -310,7 +315,7 @@ export const RequestPanel = React.memo(function RequestPanel({
                   onChange={(e) => setUrl(e.target.value)}
                   onKeyDown={handleKeyDown}
                   placeholder="Enter URL"
-                  className="flex-1 min-w-[20ch]"
+                  className="flex-1 min-w-[25ch]"
                 />
               </div>
             </TooltipTrigger>
@@ -440,7 +445,7 @@ export const RequestPanel = React.memo(function RequestPanel({
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
                   transition={{ duration: 0.2, ease: "easeInOut" }}
-                  className="flex flex-col sm:flex-row gap-2 sm:items-center"
+                  className="grid grid-cols-[1fr_auto] gap-2 sm:items-center"
                 >
                   <div className="flex flex-col sm:flex-row gap-2 flex-1">
                     <Input
@@ -463,12 +468,12 @@ export const RequestPanel = React.memo(function RequestPanel({
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="icon"
                         onClick={() => removeHeader(header.id)}
-                        className="text-destructive hover:text-destructive shrink-0 self-start sm:self-center"
+                        className="text-destructive hover:text-destructive h-full border-destructive/30 bg-destructive/5"
                       >
-                        <X className="w-4 h-4" />
+                        <Delete className="w-4 h-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -476,8 +481,7 @@ export const RequestPanel = React.memo(function RequestPanel({
                     </TooltipContent>
                   </Tooltip>
                   {index < headers.length - 1 && (
-                    <div className="sm:hidden mt-2 mb-4">
-                      <div className="border-t border-border"></div>
+                    <div className="sm:hidden mb-2">
                     </div>
                   )}
                 </motion.div>
