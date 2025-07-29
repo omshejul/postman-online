@@ -5,8 +5,21 @@
   "scripts": {
     "dev": "next dev --turbopack",
     "build": "next build",
+    "build:analyze": "cross-env ANALYZE=true next build",
+    "build:production": "cross-env NODE_ENV=production next build && npm run build:sw",
+    "build:sw": "echo 'Service worker already in public directory'",
     "start": "next start",
-    "lint": "next lint"
+    "start:production": "cross-env NODE_ENV=production next start",
+    "lint": "next lint",
+    "lint:fix": "next lint --fix",
+    "type-check": "tsc --noEmit",
+    "analyze": "npm run build:analyze && npx webpack-bundle-analyzer .next/static/chunks/*.js",
+    "perf:audit": "npx lighthouse http://localhost:3000 --chrome-flags='--headless' --output=html --output-path=./lighthouse-report.html",
+    "perf:bundle": "npx bundlesize",
+    "test": "echo 'Tests not implemented yet' && exit 0",
+    "test:e2e": "echo 'E2E tests not implemented yet' && exit 0",
+    "clean": "rm -rf .next out dist",
+    "prebuild": "npm run clean && npm run type-check"
   },
   "dependencies": {
     "@radix-ui/react-collapsible": "^1.1.11",
@@ -35,9 +48,25 @@
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
+    "cross-env": "^7.0.3",
     "eslint": "^9",
     "eslint-config-next": "15.4.4",
     "tailwindcss": "^4",
-    "typescript": "^5"
+    "typescript": "^5",
+    "webpack-bundle-analyzer": "^4.10.2"
+  },
+  "bundlesize": [
+    {
+      "path": ".next/static/chunks/pages/*.js",
+      "maxSize": "100 kB"
+    },
+    {
+      "path": ".next/static/chunks/*.js",
+      "maxSize": "50 kB"
+    }
+  ],
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
   }
 }

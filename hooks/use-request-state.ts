@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Cookies from "js-cookie";
 
 interface Header {
@@ -16,6 +16,7 @@ interface RequestState {
 }
 
 const COOKIE_NAME = "api-tester-state";
+const DEBOUNCE_DELAY = 500; // 500ms debounce
 const COOKIE_OPTIONS = {
   expires: 30, // 30 days
   sameSite: "strict" as const,
@@ -33,6 +34,31 @@ const DEFAULT_STATE: RequestState = {
 export function useRequestState() {
   const [state, setState] = useState<RequestState>(DEFAULT_STATE);
   const [isLoaded, setIsLoaded] = useState(false);
+  const saveTimeoutRef = useRef<NodeJS.Timeout>();
+  const lastSavedStateRef = useRef<string>("");
+
+  // Debounced save function
+  const debouncedSave = useCallback((newState: RequestState) => {
+    // Clear existing timeout
+    if (saveTimeoutRef.current) {
+      clearTimeout(saveTimeoutRef.current);
+    }
+
+    // Set new timeout
+    saveTimeoutRef.current = setTimeout(() => {
+      try {
+        const stateString = JSON.stringify(newState);
+        
+        // Only save if state has actually changed
+        if (stateString !== lastSavedStateRef.current) {
+          Cookies.set(COOKIE_NAME, stateString, COOKIE_OPTIONS);
+          lastSavedStateRef.current = stateString;
+        }
+      } catch (error) {
+        console.warn("Failed to save request state to cookies:", error);
+      }
+    }, DEBOUNCE_DELAY);
+  }, []);
 
   // Load state from cookies on mount
   useEffect(() => {
@@ -50,6 +76,7 @@ export function useRequestState() {
           typeof parsedState.body === "string"
         ) {
           setState(parsedState);
+          lastSavedStateRef.current = savedState;
         }
       }
     } catch (error) {
@@ -61,80 +88,64 @@ export function useRequestState() {
     }
   }, []);
 
-  // Save state to cookies whenever it changes
-  const saveState = useCallback((newState: RequestState) => {
-    try {
-      setState(newState);
-      Cookies.set(COOKIE_NAME, JSON.stringify(newState), COOKIE_OPTIONS);
-    } catch (error) {
-      console.warn("Failed to save request state to cookies:", error);
-    }
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (saveTimeoutRef.current) {
+        clearTimeout(saveTimeoutRef.current);
+      }
+    };
   }, []);
 
-  // Individual setters that automatically save
+  // Optimized state updater
+  const updateState = useCallback((updater: (prevState: RequestState) => RequestState) => {
+    setState((prevState) => {
+      const newState = updater(prevState);
+      debouncedSave(newState);
+      return newState;
+    });
+  }, [debouncedSave]);
+
+  // Individual setters that use the optimized updater
   const setMethod = useCallback(
     (method: string) => {
-      console.log("setMethod called with:", method, "current state:", state);
-      setState((prevState) => {
-        const newState = { ...prevState, method };
-        try {
-          Cookies.set(COOKIE_NAME, JSON.stringify(newState), COOKIE_OPTIONS);
-        } catch (error) {
-          console.warn("Failed to save request state to cookies:", error);
-        }
-        return newState;
-      });
+      updateState((prevState) => ({ ...prevState, method }));
     },
-    [state]
+    [updateState]
   );
 
   const setUrl = useCallback(
     (url: string) => {
-      console.log("setUrl called with:", url, "current state:", state);
-      setState((prevState) => {
-        const newState = { ...prevState, url };
-        try {
-          Cookies.set(COOKIE_NAME, JSON.stringify(newState), COOKIE_OPTIONS);
-        } catch (error) {
-          console.warn("Failed to save request state to cookies:", error);
-        }
-        return newState;
-      });
+      updateState((prevState) => ({ ...prevState, url }));
     },
-    [state]
+    [updateState]
   );
 
   const setHeaders = useCallback(
     (headers: Header[]) => {
-      console.log("setHeaders called with:", headers, "current state:", state);
-      setState((prevState) => {
-        const newState = { ...prevState, headers };
-        try {
-          Cookies.set(COOKIE_NAME, JSON.stringify(newState), COOKIE_OPTIONS);
-        } catch (error) {
-          console.warn("Failed to save request state to cookies:", error);
-        }
-        return newState;
-      });
+      updateState((prevState) => ({ ...prevState, headers }));
     },
-    [state]
+    [updateState]
   );
 
   const setBody = useCallback(
     (body: string) => {
-      console.log("setBody called with:", body, "current state:", state);
-      setState((prevState) => {
-        const newState = { ...prevState, body };
-        try {
-          Cookies.set(COOKIE_NAME, JSON.stringify(newState), COOKIE_OPTIONS);
-        } catch (error) {
-          console.warn("Failed to save request state to cookies:", error);
-        }
-        return newState;
-      });
+      updateState((prevState) => ({ ...prevState, body }));
     },
-    [state]
+    [updateState]
   );
+
+  // Immediate save function (for complete request loads)
+  const saveStateImmediately = useCallback((newState: RequestState) => {
+    try {
+      setState(newState);
+      const stateString = JSON.stringify(newState);
+      Cookies.set(COOKIE_NAME, stateString, COOKIE_OPTIONS);
+      lastSavedStateRef.current = stateString;
+    } catch (error) {
+      console.warn("Failed to save request state to cookies:", error);
+    }
+  }, []);
 
   // Load a complete request (from history or examples)
   const loadRequest = useCallback(
@@ -145,15 +156,15 @@ export function useRequestState() {
         headers: request.headers,
         body: request.body,
       };
-      saveState(newState);
+      saveStateImmediately(newState);
     },
-    [saveState]
+    [saveStateImmediately]
   );
 
   // Clear state and reset to default
   const clearState = useCallback(() => {
-    saveState(DEFAULT_STATE);
-  }, [saveState]);
+    saveStateImmediately(DEFAULT_STATE);
+  }, [saveStateImmediately]);
 
   return {
     // State values
