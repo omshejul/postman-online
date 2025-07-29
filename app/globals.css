@@ -149,6 +149,14 @@
   --shadow-2xl: var(--shadow-2xl);
 }
 
+@layer base {
+
+  input,
+  select {
+    font-size: 16px !important;
+  }
+}
+
 body {
   background: var(--background);
   color: var(--foreground);

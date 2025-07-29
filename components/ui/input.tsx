@@ -26,7 +26,11 @@ const Input = React.forwardRef<HTMLInputElement, InputProps>(
           className
         )}
         ref={ref}
-        whileFocus={{ scale: 1.01 }}
+        whileFocus={{
+          outline: "2px solid var(--ring)",
+          outlineOffset: "0px",
+          borderColor: "var(--ring)",
+        }}
         transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
         {...props}
       />
