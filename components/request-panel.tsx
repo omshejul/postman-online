@@ -3,12 +3,19 @@
 import React, { useState, useCallback, useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Send, Plus, X, Code, Eye, Check, AlertCircle } from "lucide-react";
+
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { cn } from "@/lib/utils";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
+import { cn, generateId } from "@/lib/utils";
 
 interface Header {
+  id: string;
   key: string;
   value: string;
 }
@@ -81,21 +88,22 @@ export const RequestPanel = React.memo(function RequestPanel({
   );
 
   const addHeader = useCallback(() => {
-    setHeaders([...headers, { key: "", value: "" }]);
+    setHeaders([...headers, { id: generateId(), key: "", value: "" }]);
   }, [headers, setHeaders]);
 
   const updateHeader = useCallback(
-    (index: number, field: "key" | "value", value: string) => {
-      const newHeaders = [...headers];
-      newHeaders[index][field] = value;
+    (id: string, field: "key" | "value", value: string) => {
+      const newHeaders = headers.map((header) =>
+        header.id === id ? { ...header, [field]: value } : header
+      );
       setHeaders(newHeaders);
     },
     [headers, setHeaders]
   );
 
   const removeHeader = useCallback(
-    (index: number) => {
-      setHeaders(headers.filter((_, i) => i !== index));
+    (id: string) => {
+      setHeaders(headers.filter((header) => header.id !== id));
     },
     [headers, setHeaders]
   );
@@ -172,13 +180,14 @@ export const RequestPanel = React.memo(function RequestPanel({
   }, [setHtmlContent]);
 
   const handleSendRequest = useCallback(() => {
-    setButtonState("loading");
     onSendRequest();
   }, [onSendRequest]);
 
   // Reset button state when loading changes
   React.useEffect(() => {
-    if (!loading) {
+    if (loading) {
+      setButtonState("loading");
+    } else {
       if (requestSuccess) {
         setButtonState("success");
         setTimeout(() => setButtonState("idle"), 2000);
@@ -270,30 +279,48 @@ export const RequestPanel = React.memo(function RequestPanel({
       <CardContent className="p-6 space-y-6">
         {/* Method and URL */}
         <motion.div
-          className="flex gap-2"
+          className="flex gap-2 flex-wrap md:flex-nowrap"
           initial={{ opacity: 0, x: -20 }}
           animate={{ opacity: 1, x: 0 }}
           transition={{ delay: 0.1, duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
         >
-          <select
-            value={method}
-            onChange={(e) => setMethod(e.target.value)}
-            className="px-3 py-2 border border-input rounded-md bg-background text-foreground focus:ring-2 focus:ring-ring focus:border-transparent min-w-[100px]"
+          <Tooltip
+            open={
+              requestError
+                ? requestError.includes("Please enter a valid URL")
+                : false
+            }
           >
-            {HTTP_METHODS.map((m) => (
-              <option key={m} value={m}>
-                {m}
-              </option>
-            ))}
-          </select>
-          <Input
-            type="url"
-            value={url}
-            onChange={(e) => setUrl(e.target.value)}
-            onKeyDown={handleKeyDown}
-            placeholder="Enter URL"
-            className="flex-1"
-          />
+            <TooltipTrigger asChild>
+              <div className="flex gap-2 w-full flex-wrap">
+                <select
+                  value={method}
+                  onChange={(e) => setMethod(e.target.value)}
+                  className="px-3 py-2 border border-input rounded-md bg-background text-foreground focus:ring-2 focus:ring-ring focus:border-transparent max-w-[15ch]"
+                >
+                  {HTTP_METHODS.map((m) => (
+                    <option key={m} value={m}>
+                      {m}
+                    </option>
+                  ))}
+                </select>
+                <Input
+                  type="url"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  onKeyDown={handleKeyDown}
+                  placeholder="Enter URL"
+                  className="flex-1 min-w-[20ch]"
+                />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent side="top">
+              <div className="flex items-center gap-1">
+                <AlertCircle className="w-3 h-3" />
+                Enter a URL
+              </div>
+            </TooltipContent>
+          </Tooltip>
           <motion.div
             layout
             whileHover={{
@@ -311,25 +338,20 @@ export const RequestPanel = React.memo(function RequestPanel({
               damping: 17,
               layout: { duration: 0.3, ease: [0.4, 0, 0.2, 1] },
             }}
+            className="w-full md:w-auto"
           >
             <Button
               onClick={handleSendRequest}
               disabled={loading || buttonState === "loading"}
               variant={getButtonVariant()}
               className={cn(
-                "relative overflow-hidden transition-all duration-300 ease-out",
+                "relative overflow-hidden transition-all duration-300 ease-out w-full md:w-auto",
                 buttonState === "success" && "bg-green-600 hover:bg-green-700",
                 buttonState === "error" && "bg-red-600 hover:bg-red-700"
               )}
               style={{
-                width:
-                  buttonState === "loading"
-                    ? "110px"
-                    : buttonState === "success"
-                    ? "85px"
-                    : buttonState === "error"
-                    ? "85px"
-                    : "80px",
+                width: "100%",
+
                 transition:
                   "width 0.3s ease-out, background-color 0.3s ease-out",
               }}
@@ -409,42 +431,59 @@ export const RequestPanel = React.memo(function RequestPanel({
             </Button>
           </div>
 
-          <AnimatePresence>
-            <div className="space-y-2">
+          <div className="space-y-2">
+            <AnimatePresence>
               {headers.map((header, index) => (
                 <motion.div
-                  key={index}
+                  key={header.id}
                   initial={{ opacity: 0, height: 0 }}
                   animate={{ opacity: 1, height: "auto" }}
                   exit={{ opacity: 0, height: 0 }}
-                  className="flex gap-2"
+                  transition={{ duration: 0.2, ease: "easeInOut" }}
+                  className="flex flex-col sm:flex-row gap-2 sm:items-center"
                 >
-                  <Input
-                    value={header.key}
-                    onChange={(e) => updateHeader(index, "key", e.target.value)}
-                    placeholder="Header name"
-                    className="flex-1"
-                  />
-                  <Input
-                    value={header.value}
-                    onChange={(e) =>
-                      updateHeader(index, "value", e.target.value)
-                    }
-                    placeholder="Header value"
-                    className="flex-1"
-                  />
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => removeHeader(index)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <X className="w-4 h-4" />
-                  </Button>
+                  <div className="flex flex-col sm:flex-row gap-2 flex-1">
+                    <Input
+                      value={header.key}
+                      onChange={(e) =>
+                        updateHeader(header.id, "key", e.target.value)
+                      }
+                      placeholder="Header name"
+                      className="flex-1"
+                    />
+                    <Input
+                      value={header.value}
+                      onChange={(e) =>
+                        updateHeader(header.id, "value", e.target.value)
+                      }
+                      placeholder="Header value"
+                      className="flex-1"
+                    />
+                  </div>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeHeader(header.id)}
+                        className="text-destructive hover:text-destructive shrink-0 self-start sm:self-center"
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Remove header</p>
+                    </TooltipContent>
+                  </Tooltip>
+                  {index < headers.length - 1 && (
+                    <div className="sm:hidden mt-2 mb-4">
+                      <div className="border-t border-border"></div>
+                    </div>
+                  )}
                 </motion.div>
               ))}
-            </div>
-          </AnimatePresence>
+            </AnimatePresence>
+          </div>
         </motion.div>
 
         {/* Request Body */}
