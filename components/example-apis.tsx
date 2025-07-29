@@ -1,7 +1,16 @@
 "use client";
 
-import React, { useCallback } from "react";
-import { Zap, Globe, Cloud, Database, TestTube, Currency } from "lucide-react";
+import React, { useCallback, useState } from "react";
+import {
+  Zap,
+  Globe,
+  Cloud,
+  Database,
+  TestTube,
+  Currency,
+  ArrowLeft,
+  ChevronRight,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
@@ -312,7 +321,7 @@ const exampleApis: ExampleApi[] = [
   {
     name: "Exchange Rates",
     method: "GET",
-    url: "https://api.exchangerate-api.com/v4/latest/USD",
+    url: "https://open.er-api.com/v6/latest/USD",
     description: "Get USD exchange rates",
     category: "Finance",
     subcategory: "Currency",
@@ -434,6 +443,17 @@ const getCategoryIcon = (category: string) => {
 };
 
 export default function ExampleApis({ onSelectApi }: ExampleApisProps) {
+  const [isOpen, setIsOpen] = useState(false);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [isMobile, setIsMobile] = useState(false);
+
+  React.useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 640);
+    checkMobile();
+    window.addEventListener("resize", checkMobile);
+    return () => window.removeEventListener("resize", checkMobile);
+  }, []);
+
   const handleSelectApi = useCallback(
     (api: ExampleApi) => {
       console.log("Example API selected:", api);
@@ -442,9 +462,24 @@ export default function ExampleApis({ onSelectApi }: ExampleApisProps) {
         method: api.method,
         url: api.url,
       });
+      setIsOpen(false);
+      setSelectedCategory(null);
     },
     [onSelectApi]
   );
+
+  const handleCategoryClick = useCallback(
+    (category: string) => {
+      if (isMobile) {
+        setSelectedCategory(category);
+      }
+    },
+    [isMobile]
+  );
+
+  const handleBackClick = useCallback(() => {
+    setSelectedCategory(null);
+  }, []);
 
   // Group APIs by category and subcategory
   const groupedApis = exampleApis.reduce((acc, api) => {
@@ -459,7 +494,7 @@ export default function ExampleApis({ onSelectApi }: ExampleApisProps) {
   }, {} as Record<string, Record<string, ExampleApi[]>>);
 
   return (
-    <DropdownMenu>
+    <DropdownMenu open={isOpen} onOpenChange={setIsOpen}>
       <DropdownMenuTrigger asChild>
         <Button
           variant="ghost"
@@ -471,9 +506,10 @@ export default function ExampleApis({ onSelectApi }: ExampleApisProps) {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent
-        className=" max-h-[70vh] overflow-y-auto p-1"
+        className="max-h-[70vh] overflow-y-auto p-1 w-[calc(100vw-2rem)] sm:w-auto"
         align="start"
         sideOffset={8}
+        side="bottom"
       >
         <DropdownMenuLabel className="px-2 py-1.5">
           <div className="space-y-0.5">
@@ -486,66 +522,136 @@ export default function ExampleApis({ onSelectApi }: ExampleApisProps) {
 
         <DropdownMenuSeparator className="my-1" />
 
-        <div className="space-y-0.5">
-          {Object.entries(groupedApis).map(([category, subcategories]) => (
-            <DropdownMenuSub key={category}>
-              <DropdownMenuSubTrigger className="flex items-center gap-2 px-2 py-2 rounded-md hover:bg-accent hover:text-accent-foreground focus:bg-accent data-[state=open]:bg-accent transition-all duration-200 cursor-pointer">
-                <div className="flex items-center justify-center w-4 h-4 text-muted-foreground transition-colors">
-                  {getCategoryIcon(category)}
-                </div>
-                <span className="font-medium text-sm">{category}</span>
-              </DropdownMenuSubTrigger>
-              <DropdownMenuPortal>
-                <DropdownMenuSubContent
-                  className="max-h-[60vh] overflow-y-auto p-1"
-                  sideOffset={2}
-                >
-                  {Object.entries(subcategories).map(
-                    ([subcategory, apis], subIndex) => (
-                      <div key={subcategory} className="space-y-0.5">
-                        {Object.keys(subcategories).length > 1 && (
-                          <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground px-2 py-1 uppercase tracking-wide">
-                            {subcategory}
-                          </DropdownMenuLabel>
-                        )}
-                        {apis.map((api, index) => (
-                          <DropdownMenuItem
-                            key={`${subcategory}-${index}`}
-                            onClick={() => handleSelectApi(api)}
-                            className="flex flex-col items-start p-2 cursor-pointer rounded-md hover:bg-accent hover:text-accent-foreground transition-colors space-y-1"
-                          >
-                            <div className="flex items-center gap-2 w-full">
-                              <span
-                                className={`px-1.5 py-0.5 text-xs font-mono rounded font-medium ${getMethodColor(
-                                  api.method
-                                )}`}
-                              >
-                                {api.method}
-                              </span>
-                              <span className="font-medium text-sm text-foreground truncate">
-                                {api.name}
-                              </span>
-                            </div>
-                            <div className="text-xs text-muted-foreground font-mono w-full truncate pl-0.5">
-                              {api.url}
-                            </div>
-                            <div className="text-xs text-muted-foreground pl-0.5">
-                              {api.description}
-                            </div>
-                          </DropdownMenuItem>
-                        ))}
-                        {Object.keys(subcategories).length > 1 &&
-                          subIndex < Object.keys(subcategories).length - 1 && (
-                            <DropdownMenuSeparator className="my-1" />
-                          )}
-                      </div>
-                    )
+        {/* Mobile: Show category content or main menu */}
+        {isMobile && selectedCategory ? (
+          <div className="space-y-0.5">
+            <button
+              onClick={handleBackClick}
+              className="flex items-center gap-2 px-2 py-2 w-full text-left rounded-md hover:bg-accent transition-colors text-sm text-muted-foreground"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              Back to categories
+            </button>
+            <DropdownMenuSeparator className="my-1" />
+            {Object.entries(groupedApis[selectedCategory]).map(
+              ([subcategory, apis], subIndex) => (
+                <div key={subcategory} className="space-y-0.5">
+                  {Object.keys(groupedApis[selectedCategory]).length > 1 && (
+                    <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground px-2 py-1 uppercase tracking-wide">
+                      {subcategory}
+                    </DropdownMenuLabel>
                   )}
-                </DropdownMenuSubContent>
-              </DropdownMenuPortal>
-            </DropdownMenuSub>
-          ))}
-        </div>
+                  {apis.map((api, index) => (
+                    <DropdownMenuItem
+                      key={`${subcategory}-${index}`}
+                      onClick={() => handleSelectApi(api)}
+                      className="flex flex-col items-start p-2 cursor-pointer rounded-md hover:bg-accent hover:text-accent-foreground transition-colors space-y-1"
+                    >
+                      <div className="flex items-center gap-2 w-full">
+                        <span
+                          className={`px-1.5 py-0.5 text-xs font-mono rounded font-medium ${getMethodColor(
+                            api.method
+                          )}`}
+                        >
+                          {api.method}
+                        </span>
+                        <span className="font-medium text-sm text-foreground truncate">
+                          {api.name}
+                        </span>
+                      </div>
+                      <div className="text-xs text-muted-foreground font-mono w-full truncate pl-0.5">
+                        {api.url}
+                      </div>
+                      <div className="text-xs text-muted-foreground pl-0.5">
+                        {api.description}
+                      </div>
+                    </DropdownMenuItem>
+                  ))}
+                  {Object.keys(groupedApis[selectedCategory]).length > 1 &&
+                    subIndex <
+                      Object.keys(groupedApis[selectedCategory]).length - 1 && (
+                      <DropdownMenuSeparator className="my-1" />
+                    )}
+                </div>
+              )
+            )}
+          </div>
+        ) : (
+          /* Desktop: Normal sub-menu behavior OR Mobile: Category list */
+          <div className="space-y-0.5">
+            {Object.entries(groupedApis).map(([category, subcategories]) => (
+              <div key={category}>
+                {isMobile ? (
+                  <button
+                    onClick={() => handleCategoryClick(category)}
+                    className="flex items-center gap-2 px-2 py-2 w-full text-left rounded-md hover:bg-accent hover:text-accent-foreground transition-colors"
+                  >
+                    <div className="flex items-center justify-center w-4 h-4 text-muted-foreground">
+                      {getCategoryIcon(category)}
+                    </div>
+                    <span className="font-medium text-sm">{category}</span>
+                    <ChevronRight className="w-4 h-4 ml-auto text-muted-foreground" />
+                  </button>
+                ) : (
+                  <DropdownMenuSub>
+                    <DropdownMenuSubTrigger className="flex items-center gap-2 px-2 py-2 rounded-md hover:bg-accent hover:text-accent-foreground focus:bg-accent data-[state=open]:bg-accent transition-all duration-200 cursor-pointer">
+                      <div className="flex items-center justify-center w-4 h-4 text-muted-foreground transition-colors">
+                        {getCategoryIcon(category)}
+                      </div>
+                      <span className="font-medium text-sm">{category}</span>
+                    </DropdownMenuSubTrigger>
+                    <DropdownMenuPortal>
+                      <DropdownMenuSubContent className="max-h-[60vh] overflow-y-auto p-1">
+                        {Object.entries(subcategories).map(
+                          ([subcategory, apis], subIndex) => (
+                            <div key={subcategory} className="space-y-0.5">
+                              {Object.keys(subcategories).length > 1 && (
+                                <DropdownMenuLabel className="text-xs font-semibold text-muted-foreground px-2 py-1 uppercase tracking-wide">
+                                  {subcategory}
+                                </DropdownMenuLabel>
+                              )}
+                              {apis.map((api, index) => (
+                                <DropdownMenuItem
+                                  key={`${subcategory}-${index}`}
+                                  onClick={() => handleSelectApi(api)}
+                                  className="flex flex-col items-start p-2 cursor-pointer rounded-md hover:bg-accent hover:text-accent-foreground transition-colors space-y-1"
+                                >
+                                  <div className="flex items-center gap-2 w-full">
+                                    <span
+                                      className={`px-1.5 py-0.5 text-xs font-mono rounded font-medium ${getMethodColor(
+                                        api.method
+                                      )}`}
+                                    >
+                                      {api.method}
+                                    </span>
+                                    <span className="font-medium text-sm text-foreground truncate">
+                                      {api.name}
+                                    </span>
+                                  </div>
+                                  <div className="text-xs text-muted-foreground font-mono w-full truncate pl-0.5">
+                                    {api.url}
+                                  </div>
+                                  <div className="text-xs text-muted-foreground pl-0.5">
+                                    {api.description}
+                                  </div>
+                                </DropdownMenuItem>
+                              ))}
+                              {Object.keys(subcategories).length > 1 &&
+                                subIndex <
+                                  Object.keys(subcategories).length - 1 && (
+                                  <DropdownMenuSeparator className="my-1" />
+                                )}
+                            </div>
+                          )
+                        )}
+                      </DropdownMenuSubContent>
+                    </DropdownMenuPortal>
+                  </DropdownMenuSub>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
