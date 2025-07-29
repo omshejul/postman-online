@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Merriweather, JetBrains_Mono } from "next/font/google";
 import { ErrorBoundary } from "@/components/error-boundary";
 import { ThemeProvider } from "@/components/theme-provider";
 import { Toaster } from "@/components/toaster";
@@ -15,8 +15,18 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
+const merriweather = Merriweather({
+  variable: "--font-merriweather",
+  subsets: ["latin"],
+});
+
+const jetbrainsMono = JetBrains_Mono({
+  variable: "--font-jetbrains-mono",
+  subsets: ["latin"],
+});
+
 export const metadata: Metadata = {
-  title: "API Tester - Modern Postman Alternative",
+  title: "API Tester",
   description:
     "Test your APIs with a clean, modern interface. Built with Next.js, React, and Tailwind CSS.",
   keywords: ["API", "testing", "Postman", "REST", "HTTP", "developer tools"],
@@ -35,12 +45,16 @@ export const metadata: Metadata = {
     ],
     shortcut: "/favicon.ico",
     apple: [
-      { url: "/favicon-32x32.png", sizes: "32x32", type: "image/png" },
-      { url: "/favicon-128x128.png", sizes: "128x128", type: "image/png" },
+      { url: "/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+      {
+        url: "/apple-touch-icon-precomposed.png",
+        sizes: "180x180",
+        type: "image/png",
+      },
     ],
   },
   openGraph: {
-    title: "API Tester - Modern Postman Alternative",
+    title: "API Tester",
     description: "Test your APIs with a clean, modern interface",
     type: "website",
   },
@@ -54,7 +68,7 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${merriweather.variable} ${jetbrainsMono.variable}  antialiased`}
       >
         <ThemeProvider
           attribute="class"

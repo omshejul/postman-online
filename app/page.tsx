@@ -2,6 +2,7 @@
 
 import React, { useState, useCallback } from "react";
 import { motion } from "framer-motion";
+import Image from "next/image";
 import { RequestPanel } from "@/components/request-panel";
 import { ResponsePanel } from "@/components/response-panel";
 import RequestHistory from "@/components/request-history";
@@ -9,6 +10,7 @@ import ExampleApis from "@/components/example-apis";
 import { ThemeToggle } from "@/components/theme-toggle";
 import { useLocalStorage } from "@/hooks/use-local-storage";
 import { useRequestState } from "@/hooks/use-request-state";
+import { generateId } from "@/lib/utils";
 
 interface ApiResponse {
   status: number;
@@ -109,6 +111,30 @@ export default function ApiTester() {
   }, [method, url, headers, body, saveRequest]);
 
   const sendRequest = useCallback(async () => {
+    // Validate URL
+    if (!url.trim()) {
+      setError("Please enter a valid URL");
+      // Auto-clear error after 3 seconds
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+
+    // Check if URL has a protocol
+    let validUrl = url.trim();
+    if (!validUrl.startsWith("http://") && !validUrl.startsWith("https://")) {
+      validUrl = `https://${validUrl}`;
+    }
+
+    // Basic URL validation
+    try {
+      new URL(validUrl);
+    } catch {
+      setError("Please enter a valid URL");
+      // Auto-clear error after 3 seconds
+      setTimeout(() => setError(null), 3000);
+      return;
+    }
+
     let processedBody = body;
     if (body && body.includes("```")) {
       processedBody = processTripleBackticks(body);
@@ -147,7 +173,7 @@ export default function ApiTester() {
         options.body = processedBody;
       }
 
-      const res = await fetch(url, options);
+      const res = await fetch(validUrl, options);
       const endTime = Date.now();
 
       const responseHeaders: Record<string, string> = {};
@@ -172,32 +198,28 @@ export default function ApiTester() {
       });
       setRequestSuccess(true);
     } catch (err) {
-      let errorMessage = "An error occurred";
+      let errorMessage = "Request failed";
 
-      if (err instanceof Error) {
-        // Handle CORS errors specifically
+      if (err instanceof TypeError && err.message === "Failed to fetch") {
+        // Check if it's likely a CORS issue
         if (
-          err.message.includes("CORS") ||
-          err.message.includes("Access-Control")
+          validUrl.startsWith("http://") &&
+          window.location.protocol === "https:"
         ) {
-          errorMessage = `CORS Error: ${err.message}`;
-        } else if (err.message.includes("Failed to fetch")) {
-          // Try to provide more helpful error messages for network issues
-          if (err.message.includes("ERR_NETWORK")) {
-            errorMessage =
-              "Network Error: Unable to connect to the server. Please check your internet connection and try again.";
-          } else if (err.message.includes("ERR_NAME_NOT_RESOLVED")) {
-            errorMessage =
-              "DNS Error: Unable to resolve the domain name. Please check the URL and try again.";
-          } else if (err.message.includes("ERR_CONNECTION_REFUSED")) {
-            errorMessage =
-              "Connection Refused: The server is not accepting connections. The server might be down or the URL might be incorrect.";
-          } else {
-            errorMessage = `Network Error: ${err.message}`;
-          }
+          errorMessage =
+            "Mixed content error: Cannot make HTTP request from HTTPS page";
+        } else if (
+          !validUrl.startsWith("http://") &&
+          !validUrl.startsWith("https://")
+        ) {
+          errorMessage = "Invalid URL: Must start with http:// or https://";
         } else {
-          errorMessage = err.message;
+          errorMessage = `Cannot connect to ${
+            new URL(validUrl).hostname
+          } - Server unreachable or CORS blocked`;
         }
+      } else if (err instanceof Error) {
+        errorMessage = err.message;
       }
 
       setError(errorMessage);
@@ -221,7 +243,14 @@ export default function ApiTester() {
       headers: Array<{ key: string; value: string }>;
       body: string;
     }) => {
-      loadRequestState(request);
+      const requestWithIds = {
+        ...request,
+        headers: request.headers.map((header) => ({
+          ...header,
+          id: generateId(),
+        })),
+      };
+      loadRequestState(requestWithIds);
     },
     [loadRequestState]
   );
@@ -232,9 +261,14 @@ export default function ApiTester() {
 
       setMethod(api.method);
       setUrl(api.url);
-
       // Reset headers to default for the new request
-      setHeaders([{ key: "Content-Type", value: "application/json" }]);
+      setHeaders([
+        {
+          key: "Content-Type",
+          value: "application/json",
+          id: generateId(),
+        },
+      ]);
 
       if (["POST", "PUT", "PATCH"].includes(api.method)) {
         if (api.url.includes("jsonplaceholder")) {
@@ -322,7 +356,7 @@ export default function ApiTester() {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ duration: 0.5, ease: [0.4, 0, 0.2, 1] }}
-        className="container mx-auto p-6"
+        className="container mx-auto p-4 sm:p-6"
       >
         {/* Header */}
         <motion.div
@@ -331,16 +365,22 @@ export default function ApiTester() {
           transition={{ delay: 0.1, duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
           className="mb-8"
         >
-          <div className="flex items-center justify-between mb-4">
-            <div>
-              <h1 className="text-4xl font-bold mb-2">API Tester</h1>
-              <p className="text-muted-foreground">
-                Test your APIs with a clean, modern interface
-              </p>
+          <div className="flex flex-col items-start sm:items-center justify-between mb-4 sm:gap-0">
+            <div className="flex items-center mb-2 gap-2">
+              <Image
+                src="/logo.svg"
+                alt="API Tester Logo"
+                width={40}
+                height={40}
+                className="w-8 h-8 sm:w-10 sm:h-10 rounded-lg overflow-hidden"
+              />
+              <h1 className="text-3xl sm:text-4xl font-bold">API Tester</h1>
             </div>
-            <div className="flex items-center gap-3 ">
-              <RequestHistory onLoadRequest={loadRequest} />
-              <ExampleApis onSelectApi={selectExampleApi} />
+            <div className="flex flex-wrap w-full justify-between items-center gap-2 sm:gap-3">
+              <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                <RequestHistory onLoadRequest={loadRequest} />
+                <ExampleApis onSelectApi={selectExampleApi} />
+              </div>
               <ThemeToggle />
             </div>
           </div>
@@ -348,18 +388,24 @@ export default function ApiTester() {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ delay: 0.3, duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            className="text-sm text-muted-foreground bg-muted px-4 py-2 rounded-lg border border-border"
+            className="text-xs leading-6 sm:text-sm text-muted-foreground bg-muted px-3 sm:px-4 py-2 rounded-lg border border-border"
           >
             💡 Tip: Use{" "}
-            <kbd className="px-2 py-1 bg-background rounded text-xs border border-border">
+            <kbd className="px-1.5 sm:px-2 py-0.5 sm:py-1 bg-background rounded text-xs border border-border">
               Ctrl/Cmd + Enter
             </kbd>{" "}
-            to send requests quickly • Your work is automatically saved and
-            restored • Wrap HTML content with{" "}
+            <span className="hidden sm:inline">
+              to send requests quickly • Your work is automatically saved and
+              restored • Wrap HTML content with{" "}
+            </span>
+            <span className="inline sm:hidden">
+              to send • Auto-saves • Wrap HTML with{" "}
+            </span>
             <code className="px-1 bg-background rounded border border-border">
               ```
             </code>{" "}
-            for automatic escaping
+            <span className="hidden sm:inline">for automatic escaping</span>
+            <span className="inline sm:hidden">to escape</span>
           </motion.p>
         </motion.div>
 
