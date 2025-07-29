@@ -153,7 +153,7 @@ export function ResponsePanel({
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.2, ease: [0.4, 0, 0.2, 1] }}
-            className="bg-destructive/10 border border-destructive/20 rounded-md p-4"
+            className="bg-destructive/10 border border-destructive/20 rounded-md p-4 mb-6"
           >
             <div className="flex items-center gap-2 text-destructive">
               <XCircle className="w-5 h-5" />

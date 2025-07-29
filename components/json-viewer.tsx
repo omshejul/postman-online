@@ -70,7 +70,14 @@ export function JsonViewer({
   return (
     <div className={className}>
       {isRawView ? (
-        <pre className="font-mono text-sm">{JSON.stringify(data, null, 2)}</pre>
+        <pre
+          style={{
+            fontFamily: "var(--font-jetbrains-mono)",
+            fontSize: "0.75rem",
+          }}
+        >
+          {JSON.stringify(data, null, 2)}
+        </pre>
       ) : (
         <ReactJson
           src={data as object}
@@ -78,6 +85,9 @@ export function JsonViewer({
           name={null}
           displayDataTypes={false}
           enableClipboard={false}
+          quotesOnKeys={false}
+          displayObjectSize={true}
+          indentWidth={2}
           style={{
             backgroundColor: "transparent",
             fontFamily: "var(--font-geist-mono)",
